@@ -1,0 +1,20 @@
+image: gcc
+
+stages:
+  - static_checks
+  - build
+
+before_script:
+  - apt-get update --yes
+  - apt-get install --yes cmake
+
+static_checks:
+  stage: static_checks
+  script:
+    - apt-get install --yes cppcheck
+    - /bin/bash scripts/run_static_checks.sh lib/
+
+build:
+  stage: build
+  script:
+    - /bin/bash scripts/run_build.sh
