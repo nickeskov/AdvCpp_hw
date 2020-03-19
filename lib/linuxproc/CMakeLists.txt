@@ -28,7 +28,7 @@ endif()
 
 
 if (ENABLE_SANITIZE)
-    message("Sanitizers ENABLED")
+    message("Sanitizers ENABLED for ${PROJECT_NAME}")
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_SANITIZE_FLAGS}")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCC_SANITIZE_FLAGS}")
@@ -63,6 +63,6 @@ endif()
 
 include_directories(include)
 
-add_library(linuxproc src/library.cpp include/library.h)
+add_library(linuxproc src/process.cpp)
 
 target_compile_options(linuxproc PRIVATE -Wall -Wextra -Wpedantic -Werror)

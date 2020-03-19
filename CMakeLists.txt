@@ -27,7 +27,7 @@ if (CMAKE_BUILD_TYPE STREQUAL Release)
 endif()
 
 if (ENABLE_SANITIZE)
-    message("Sanitizers ENABLED")
+    message("Sanitizers ENABLED for ${PROJECT_NAME}")
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_SANITIZE_FLAGS}")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCC_SANITIZE_FLAGS}")
@@ -66,6 +66,6 @@ include_directories(lib/linuxproc/include)
 
 include_directories(include)
 
-add_executable(hw1 src/main.cpp)
+add_executable(hw1 src/main.c)
 
 target_compile_options(hw1 PRIVATE -Wall -Wextra -Wpedantic -Werror)

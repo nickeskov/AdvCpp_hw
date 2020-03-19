@@ -1,6 +1,0 @@
-#ifndef LINUXPROC_LIBRARY_H
-#define LINUXPROC_LIBRARY_H
-
-void hello();
-
-#endif //LINUXPROC_LIBRARY_H
