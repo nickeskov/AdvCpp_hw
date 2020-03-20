@@ -18,13 +18,8 @@ namespace linuxproc {
 constexpr int PIPE_WRITE = 1;
 constexpr int PIPE_READ = 0;
 
-template <typename T, typename ...Ts>
-inline constexpr bool check_pack_type =
-        std::conjunction_v<std::is_same<T,std::remove_const_t<std::remove_reference_t<Ts>>>...>;
-
 class Process {
   public:
-
 
     Process(const std::string &path, char *const argv[]);
 
@@ -48,6 +43,8 @@ class Process {
     [[nodiscard]] bool is_readable() const noexcept;
 
     void close_stdin();
+
+    [[nodiscard]] pid_t get_pid() const noexcept ;
 
     ~Process() noexcept;
 
@@ -76,14 +73,6 @@ template<typename... Args>
 Process::Process(const std::string &path, Args... args)
         : pid_(-1), fd_process_to_(-1), fd_process_from_(-1) {
 
-    if (sizeof...(args) > 0) {
-
-//        static_assert(
-//                check_pack_type<std::string, args...>
-//                || check_pack_type<char *, args...>,
-//                "The type must be <std::string &>, <std::string_view> or <char *>");
-    }
-
     int pipe_to_child[2];
     int pipe_from_child[2];
 
@@ -97,9 +86,6 @@ Process::Process(const std::string &path, Args... args)
     if (pid_ == 0) {
         prepare_to_exec(pipe_to_child, pipe_from_child);
 
-        if constexpr (check_pack_type<std::string, Args...>) {
-
-        }
         if (::execl(path.data(), args.data()..., nullptr) == -1) {
             std::stringstream errors;
             errors << std::strerror(errno) << std::endl;
