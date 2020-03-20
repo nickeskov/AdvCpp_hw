@@ -1,7 +1,7 @@
 #include "process.h"
 
 int main() {
-    char buf[10] = {'\0'};
+    char buf[100] = {'\0'};
 
     auto proc = linuxproc::Process("/bin/cat", std::string_view("/bin/cat"));
 
@@ -18,6 +18,19 @@ int main() {
 
     std::cout << std::boolalpha;
     std::cout << proc.is_readable() << std::endl;
+
+
+    proc = linuxproc::Process("/bin/bash", std::string_view("/bin/bash"));
+
+    char cpuinfo[] = "/bin/cat /proc/cpuinfo";
+    proc.write_exact(cpuinfo, sizeof(cpuinfo) - 1);
+    proc.close_stdin();
+
+    int br = -1;
+    while ((br = proc.read(buf, sizeof(buf) - 1)) > 0) {
+        buf[br] = '\0';
+        std::cout << buf;
+    }
 
     return 0;
 }
