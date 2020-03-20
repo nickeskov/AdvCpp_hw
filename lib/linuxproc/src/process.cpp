@@ -1,6 +1,7 @@
 #include "process.h"
 
 #include <sstream>
+#include <algorithm>
 
 namespace linuxproc {
 namespace {
@@ -8,6 +9,7 @@ namespace {
 constexpr int DESCRIPTOR_ALREADY_CLOSED = -2;
 
 }
+
 
 Process::Process(const std::string &path, char *const argv[])
         : pid_(-1), fd_process_to_(-1), fd_process_from_(-1) {
@@ -19,9 +21,10 @@ Process::Process(const std::string &path, const std::vector<std::string> &argv)
     std::vector<const char *> args;
     args.reserve(argv.size() + 1);
 
-    for (const std::string &arg : argv) {
-        args.push_back(arg.data());
-    }
+    std::transform(argv.cbegin(), argv.cend(), args.begin(),
+                   [](auto arg) {
+                       return arg.data();
+                   });
     args.push_back(nullptr);
 
     create_proc(path, const_cast<char *const *>(args.data()));
@@ -67,11 +70,14 @@ void Process::read_exact(void *buf, size_t len) {
 }
 
 bool Process::is_readable() const noexcept {
-    return ::read(fd_process_from_, nullptr, 0) == 0;
+    char tmp;
+    return ::read(fd_process_from_, &tmp, 0) == 0;
 }
 
 void Process::close_stdin() {
-    if (close(fd_process_to_) == -1) {
+    if (fd_process_to_ != DESCRIPTOR_ALREADY_CLOSED
+        && close(fd_process_to_) == -1) {
+
         std::stringstream errors;
         errors << strerror(errno) << std::endl;
         throw std::runtime_error(errors.str());
@@ -84,11 +90,11 @@ Process::~Process() noexcept {
         std::cerr << "ERROR:" << "process " << pid_ << ":"
                   << strerror(errno) << std::endl;
     }
-    if (close(fd_process_to_) == -1) {
+    if (close(fd_process_from_) == -1) {
         std::cerr << "ERROR:" << "process " << pid_ << ":"
                   << strerror(errno) << std::endl;
     }
-    if (kill(pid_, SIGKILL) == -1) {
+    if (kill(pid_, SIGTERM) == -1) {
         std::cerr << "ERROR:" << "process " << pid_ << ":"
                   << strerror(errno) << std::endl;
     }
@@ -101,7 +107,6 @@ Process::~Process() noexcept {
                   << " was exited with code " << status << std::endl;
     }
 }
-
 
 void Process::create_proc_pipes(int pipe_to_child[2], int pipe_from_child[2]) {
     if (pipe(pipe_to_child) == -1) {
@@ -160,7 +165,6 @@ void Process::prepare_to_exec(int pipe_to_child[2], int pipe_from_child[2]) {
         errors << std::strerror(errno) << std::endl;
         throw std::runtime_error(errors.str());
     }
-
 }
 
 void Process::parent_process_cleanups(int pipe_to_child[2], int pipe_from_child[2]) {
@@ -172,7 +176,7 @@ void Process::parent_process_cleanups(int pipe_to_child[2], int pipe_from_child[
                        pipe_from_child[PIPE_READ],
                        pipe_from_child[PIPE_WRITE]
                );
-        if (kill(pid_, SIGKILL) == -1) {
+        if (kill(pid_, SIGTERM) == -1) {
             errors << std::strerror(errno) << std::endl;
             throw std::runtime_error(errors.str());
         }
@@ -188,7 +192,7 @@ void Process::parent_process_cleanups(int pipe_to_child[2], int pipe_from_child[
                        pipe_to_child[PIPE_WRITE],
                        pipe_from_child[PIPE_READ]
                );
-        if (kill(pid_, SIGKILL) == -1) {
+        if (kill(pid_, SIGTERM) == -1) {
             errors << std::strerror(errno) << std::endl;
             throw std::runtime_error(errors.str());
         }
@@ -198,6 +202,7 @@ void Process::parent_process_cleanups(int pipe_to_child[2], int pipe_from_child[
         throw std::runtime_error(errors.str());
     }
 }
+
 
 void Process::create_proc(const std::string &path, char *const argv[]) {
     int pipe_to_child[2];
@@ -224,6 +229,10 @@ void Process::create_proc(const std::string &path, char *const argv[]) {
         fd_process_to_ = pipe_to_child[PIPE_WRITE];
         fd_process_from_ = pipe_from_child[PIPE_READ];
     }
+}
+
+pid_t Process::get_pid() const noexcept {
+    return pid_;
 }
 
 }
