@@ -32,6 +32,12 @@ class Process {
 
     Process &operator=(const Process &) = delete;
 
+    Process(Process &&process) noexcept;
+
+    Process &operator=(Process &&process) noexcept;
+
+    void swap(Process &rhs) noexcept;
+
     size_t write(const void *buf, size_t len);
 
     void write_exact(const void *buf, size_t len);
@@ -44,7 +50,7 @@ class Process {
 
     void close_stdin();
 
-    [[nodiscard]] pid_t get_pid() const noexcept ;
+    [[nodiscard]] pid_t get_pid() const noexcept;
 
     ~Process() noexcept;
 
@@ -52,6 +58,8 @@ class Process {
     pid_t pid_;
     int fd_process_to_;
     int fd_process_from_;
+
+    Process() noexcept;
 
     template<typename ...Args>
     std::string close_an_error(Args... fds) const {

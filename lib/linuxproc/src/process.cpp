@@ -30,6 +30,29 @@ Process::Process(const std::string &path, const std::vector<std::string> &argv)
     create_proc(path, const_cast<char *const *>(args.data()));
 }
 
+
+Process::Process(Process &&process) noexcept : Process() {
+    swap(process);
+}
+
+Process &Process::operator=(Process &&process) noexcept {
+    if (this == &process) {
+        return *this;
+    }
+    Process().swap(*this);
+    swap(process);
+
+    return *this;
+}
+
+void Process::swap(Process &rhs) noexcept {
+    std::swap(pid_, rhs.pid_);
+    std::swap(fd_process_to_, rhs.fd_process_to_);
+    std::swap(fd_process_from_, rhs.fd_process_from_);
+}
+
+Process::Process() noexcept: pid_(-1), fd_process_to_(-1), fd_process_from_(-1) {}
+
 size_t Process::write(const void *buf, size_t len) {
     return ::write(fd_process_to_, buf, len);
 }
@@ -86,6 +109,10 @@ void Process::close_stdin() {
 }
 
 Process::~Process() noexcept {
+    if (pid_ == -1) {
+        return;
+    }
+
     if (fd_process_to_ != DESCRIPTOR_ALREADY_CLOSED && close(fd_process_to_) == -1) {
         std::cerr << "ERROR:" << "process " << pid_ << ":"
                   << strerror(errno) << std::endl;
@@ -234,5 +261,6 @@ void Process::create_proc(const std::string &path, char *const argv[]) {
 pid_t Process::get_pid() const noexcept {
     return pid_;
 }
+
 
 }
