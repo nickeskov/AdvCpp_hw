@@ -3,6 +3,7 @@ image: gcc
 stages:
   - static_checks
   - build
+  - run
 
 before_script:
   - apt-get update --yes
@@ -18,3 +19,8 @@ build:
   stage: build
   script:
     - /bin/bash scripts/run_build.sh
+
+run:
+  stage: run
+  script:
+    - /bin/bash scripts/run.sh

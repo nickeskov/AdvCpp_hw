@@ -69,3 +69,4 @@ include_directories(include)
 add_executable(hw1 src/main.cpp)
 
 target_compile_options(hw1 PRIVATE -Wall -Wextra -Wpedantic -Werror)
+target_link_libraries(hw1 linuxproc)
