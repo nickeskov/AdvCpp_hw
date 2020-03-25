@@ -7,7 +7,7 @@
 namespace linuxproc {
 
 Descriptor::Descriptor(int fd) noexcept: fd_(fd) {
-    std::cerr << "[" << getpid() << "] create fd=" << fd_ << std::endl;
+//    std::cerr << "[" << getpid() << "] create fd=" << fd_ << std::endl;
 }
 
 Descriptor::Descriptor(const Descriptor &other) {
@@ -60,7 +60,7 @@ int Descriptor::close() noexcept {
     int status = 0;
     if (is_valid()) {
         status = ::close(fd_);
-        std::cerr << "[" << getpid() << "] clear fd=" << fd_ << std::endl;
+//        std::cerr << "[" << getpid() << "] clear fd=" << fd_ << std::endl;
         fd_ = -1;
     }
     return status;

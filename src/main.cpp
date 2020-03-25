@@ -28,7 +28,7 @@ int main() {
 
     int br = 0;
     while ((br = proc.read(buf, sizeof(buf) - 1)) == sizeof(buf) - 1) {
-        std::cerr << br << std::endl;
+//        std::cerr << br << std::endl;
         buf[br] = '\0';
         std::cout << buf;
     }

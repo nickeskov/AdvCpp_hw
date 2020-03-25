@@ -64,14 +64,14 @@ class Process {
 
     Process() noexcept = default;
 
-    template<typename ...ArgsT>
-    std::string close_an_error(ArgsT&&... fds) const {
-        std::stringstream errors;
-        (..., (close(std::forward<ArgsT>(fds)) == -1 ? errors << std::strerror(errno) << std::endl : errors));
-        return errors.str();
-    }
+//    template<typename ...ArgsT>
+//    std::string close_an_error(ArgsT&&... fds) const {
+//        std::stringstream errors;
+//        (..., (close(std::forward<ArgsT>(fds)) == -1 ? errors << std::strerror(errno) << std::endl : errors));
+//        return errors.str();
+//    }
 
-    void prepare_to_exec(const Pipe &pipe_to_child, const Pipe &pipe_from_child);
+    static void prepare_to_exec(const Pipe &pipe_to_child, const Pipe &pipe_from_child);
 
     void create_proc(const std::string &path, char *const argv[]);
 };

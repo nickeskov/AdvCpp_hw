@@ -94,8 +94,8 @@ void Process::prepare_to_exec(const Pipe &pipe_to_child, const Pipe &pipe_from_c
         throw DupError();
     }
 
-    std::cerr << pipe_to_child.get_write_end().data() << "|" << pipe_to_child.get_read_end().data()<<std::endl;
-    std::cerr << pipe_from_child.get_write_end().data() << "|" << pipe_from_child.get_read_end().data()<<std::endl;
+//    std::cerr << pipe_to_child.get_write_end().data() << "|" << pipe_to_child.get_read_end().data()<<std::endl;
+//    std::cerr << pipe_from_child.get_write_end().data() << "|" << pipe_from_child.get_read_end().data()<<std::endl;
 
     if (pipe_to_child.get_read_end().dup2(STDIN_FILENO) == -1) {
         throw DupError();
