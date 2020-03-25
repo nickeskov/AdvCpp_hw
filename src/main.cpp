@@ -19,18 +19,21 @@ int main() {
     std::cout << std::boolalpha;
     std::cout << proc.is_readable() << std::endl;
 
-
     proc = linuxproc::Process("/bin/bash", std::string_view("/bin/bash"));
 
-    char cpuinfo[] = "/bin/cat /proc/cpuinfo";
-    proc.write_exact(cpuinfo, sizeof(cpuinfo) - 1);
+    std::string_view cpuinfo = "/bin/cat /proc/cpuinfo\n";
+    proc.write_exact(cpuinfo.data(), cpuinfo.length());
+    proc.close_stdin();
     proc.close_stdin();
 
-    int br = -1;
-    while ((br = proc.read(buf, sizeof(buf) - 1)) > 0) {
+    int br = 0;
+    while ((br = proc.read(buf, sizeof(buf) - 1)) == sizeof(buf) - 1) {
+        std::cerr << br << std::endl;
         buf[br] = '\0';
         std::cout << buf;
     }
+    buf[br] = '\0';
+    std::cout << buf;
 
     return 0;
 }

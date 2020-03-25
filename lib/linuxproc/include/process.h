@@ -1,5 +1,5 @@
-#ifndef PROCESS_H
-#define PROCESS_H
+#ifndef HW_PROCESS_H
+#define HW_PROCESS_H
 
 #include <string>
 #include <vector>
@@ -13,6 +13,11 @@
 
 #include <wait.h>
 #include <unistd.h>
+#include <utility>
+
+#include "descriptor.h"
+#include "pipe.h"
+#include "errors.h"
 
 namespace linuxproc {
 constexpr int PIPE_WRITE = 1;
@@ -23,10 +28,8 @@ class Process {
 
     Process(const std::string &path, char *const argv[]);
 
-    Process(const std::string &path, const std::vector<std::string> &argv);
-
     template<typename ...Args>
-    explicit Process(const std::string &path, Args... args);
+    explicit Process(const std::string &path, Args &&... args);
 
     Process(const Process &) = delete;
 
@@ -38,11 +41,11 @@ class Process {
 
     void swap(Process &rhs) noexcept;
 
-    size_t write(const void *buf, size_t len);
+    ssize_t write(const void *buf, size_t len);
 
     void write_exact(const void *buf, size_t len);
 
-    size_t read(void *buf, size_t len);
+    ssize_t read(void *buf, size_t len);
 
     void read_exact(void *buf, size_t len);
 
@@ -55,59 +58,46 @@ class Process {
     ~Process() noexcept;
 
   private:
-    pid_t pid_;
-    int fd_process_to_;
-    int fd_process_from_;
+    pid_t pid_ = -1;
+    Descriptor fd_process_to_;
+    Descriptor fd_process_from_;
 
-    Process() noexcept;
+    Process() noexcept = default;
 
-    template<typename ...Args>
-    std::string close_an_error(Args... fds) const {
+    template<typename ...ArgsT>
+    std::string close_an_error(ArgsT&&... fds) const {
         std::stringstream errors;
-        (..., (close(fds) == -1 ? errors << std::strerror(errno) << std::endl : errors));
+        (..., (close(std::forward<ArgsT>(fds)) == -1 ? errors << std::strerror(errno) << std::endl : errors));
         return errors.str();
     }
 
-    void create_proc_pipes(int pipe_to_child[2], int pipe_from_child[2]);
-
-    void prepare_to_exec(int pipe_to_child[2], int pipe_from_child[2]);
-
-    void parent_process_cleanups(int pipe_to_child[2], int pipe_from_child[2]);
+    void prepare_to_exec(const Pipe &pipe_to_child, const Pipe &pipe_from_child);
 
     void create_proc(const std::string &path, char *const argv[]);
 };
 
-template<typename... Args>
-Process::Process(const std::string &path, Args... args)
-        : pid_(-1), fd_process_to_(-1), fd_process_from_(-1) {
-
-    int pipe_to_child[2];
-    int pipe_from_child[2];
-
-    create_proc_pipes(pipe_to_child, pipe_from_child);
+template<typename... ArgsT>
+Process::Process(const std::string &path, ArgsT &&... args) {
+    Pipe pipe_to_child;
+    Pipe pipe_from_child;
 
     pid_ = fork();
     if (pid_ == -1) {
-        throw std::runtime_error(std::strerror(errno));
+        throw ForkError();
     }
 
     if (pid_ == 0) {
         prepare_to_exec(pipe_to_child, pipe_from_child);
-
-        if (::execl(path.data(), args.data()..., nullptr) == -1) {
-            std::stringstream errors;
-            errors << std::strerror(errno) << std::endl;
-            throw std::runtime_error(errors.str());
+        if (::execl(path.data(), std::forward<ArgsT>(args).data()..., nullptr) == -1) {
+            throw ExecError();
         }
     } else {
-        parent_process_cleanups(pipe_to_child, pipe_from_child);
-
-        fd_process_to_ = pipe_to_child[PIPE_WRITE];
-        fd_process_from_ = pipe_from_child[PIPE_READ];
+        fd_process_to_ = std::move(pipe_to_child.get_write_end());
+        fd_process_from_ = std::move(pipe_from_child.get_read_end());
     }
 }
 
 }
 
 
-#endif //PROCESS_H
+#endif //HW_PROCESS_H

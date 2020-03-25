@@ -63,6 +63,6 @@ endif()
 
 include_directories(include)
 
-add_library(linuxproc src/process.cpp)
+add_library(linuxproc src/process.cpp src/descriptor.cpp src/pipe.cpp src/errors.cpp)
 
 target_compile_options(linuxproc PRIVATE -Wall -Wextra -Wpedantic -Werror)
