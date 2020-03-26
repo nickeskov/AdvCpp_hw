@@ -6,13 +6,8 @@
 #include <pipe.h>
 
 namespace linuxproc {
-//namespace {
-//
-//constexpr int DESCRIPTOR_ALREADY_CLOSED = -2;
-//
-//}
 
-Process::Process(const std::string &path, char *const argv[]) {
+Process::Process(std::string_view path, char *const argv[]) {
     create_proc(path, argv);
 }
 
@@ -94,19 +89,16 @@ void Process::prepare_to_exec(const Pipe &pipe_to_child, const Pipe &pipe_from_c
         throw DupError();
     }
 
-//    std::cerr << pipe_to_child.get_write_end().data() << "|" << pipe_to_child.get_read_end().data()<<std::endl;
-//    std::cerr << pipe_from_child.get_write_end().data() << "|" << pipe_from_child.get_read_end().data()<<std::endl;
-
     if (pipe_to_child.get_read_end().dup2(STDIN_FILENO) == -1) {
         throw DupError();
     }
     if (pipe_from_child.get_write_end().dup2(STDOUT_FILENO) == -1) {
-        (void)stdin_dup.dup2(STDIN_FILENO);
+        (void) stdin_dup.dup2(STDIN_FILENO);
         throw DupError();
     }
 }
 
-void Process::create_proc(const std::string &path, char *const argv[]) {
+void Process::create_proc(std::string_view path, char *const argv[]) {
     Pipe pipe_to_child;
     Pipe pipe_from_child;
 

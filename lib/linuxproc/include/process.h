@@ -14,22 +14,27 @@
 #include <wait.h>
 #include <unistd.h>
 #include <utility>
+#include <algorithm>
 
 #include "descriptor.h"
 #include "pipe.h"
 #include "errors.h"
 
 namespace linuxproc {
-constexpr int PIPE_WRITE = 1;
-constexpr int PIPE_READ = 0;
+
+template<typename ...Args>
+using pack_t = typename std::common_type<typename std::decay<Args>::type ...>::type;
+
+template<typename ...Args>
+constexpr inline bool can_be_string_view_v = std::is_convertible_v<pack_t<Args...>, std::string_view>;
 
 class Process {
   public:
 
-    Process(const std::string &path, char *const argv[]);
+    template<typename ...Args, typename = void>
+    explicit Process(std::string_view path, Args &&... args);
 
-    template<typename ...Args>
-    explicit Process(const std::string &path, Args &&... args);
+    Process(std::string_view path, char *const argv[]);
 
     Process(const Process &) = delete;
 
@@ -64,37 +69,27 @@ class Process {
 
     Process() noexcept = default;
 
-//    template<typename ...ArgsT>
-//    std::string close_an_error(ArgsT&&... fds) const {
-//        std::stringstream errors;
-//        (..., (close(std::forward<ArgsT>(fds)) == -1 ? errors << std::strerror(errno) << std::endl : errors));
-//        return errors.str();
-//    }
-
     static void prepare_to_exec(const Pipe &pipe_to_child, const Pipe &pipe_from_child);
 
-    void create_proc(const std::string &path, char *const argv[]);
+    void create_proc(std::string_view path, char *const argv[]);
 };
 
-template<typename... ArgsT>
-Process::Process(const std::string &path, ArgsT &&... args) {
-    Pipe pipe_to_child;
-    Pipe pipe_from_child;
+template<typename ...Args>
+using pack_t = typename std::common_type<typename std::decay<Args>::type ...>::type;
 
-    pid_ = fork();
-    if (pid_ == -1) {
-        throw ForkError();
-    }
-
-    if (pid_ == 0) {
-        prepare_to_exec(pipe_to_child, pipe_from_child);
-        if (::execl(path.data(), std::forward<ArgsT>(args).data()..., nullptr) == -1) {
-            throw ExecError();
-        }
-    } else {
-        fd_process_to_ = std::move(pipe_to_child.get_write_end());
-        fd_process_from_ = std::move(pipe_from_child.get_read_end());
-    }
+template<typename ...Args,
+        typename = std::enable_if_t<can_be_string_view_v<Args...>, std::string_view>>
+Process::Process(std::string_view path, Args &&... args) {
+    std::initializer_list<std::string_view> args_views = {
+            std::forward<Args>(args)...,
+            nullptr
+    };
+    // NOLINTNEXTLINE: Redundant initialization
+    std::array<const char *, sizeof...(Args) + 1> args_cstrs;
+    std::transform(args_views.begin(), args_views.end(), args_cstrs.begin(), [](const auto &str_view) {
+        return str_view.data();
+    });
+    create_proc(path, const_cast<char **const>(args_cstrs.data()));
 }
 
 }

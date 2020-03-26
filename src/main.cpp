@@ -1,9 +1,42 @@
 #include "process.h"
 
-int main() {
-    char buf[100] = {'\0'};
+//#include <utility>
+//#include <tuple>
+//#include <array>
+//#include <algorithm>
+//#include <initializer_list>
+//
+//class Test {
+//  public:
+//
+//    template<typename ...Args>
+//    using pack_t = typename std::common_type<typename std::decay<Args>::type ...>::type;
+//
+//    template<typename ...Args,
+//            typename = std::enable_if_t<
+//                    std::is_convertible_v<
+//                            pack_t<Args...>,
+//                            std::string_view
+//                    >, std::string_view>>
+//    explicit Test(std::string_view path, Args &&... args) {
+//        std::initializer_list<std::string_view> args_views = {
+//                std::forward<Args>(args)...,
+//                nullptr
+//        };
+//        // NOLINTNEXTLINE: Redundant initialization
+//        std::array<const char *, sizeof...(Args) + 1> args_cstrs;
+//        std::transform(args_views.begin(), args_views.end(), args_cstrs.begin(), [](const auto &str_view) {
+//            return str_view.data();
+//        });
+//
+//        auto proc = linuxproc::Process(path, const_cast<char ** const>(args_cstrs.data()));
+//    }
+//};
 
-    auto proc = linuxproc::Process("/bin/cat", std::string_view("/bin/cat"));
+int main() {
+    char buf[100] = "";
+
+    auto proc = linuxproc::Process("/bin/cat", "/bin/cat");
 
     proc.write("lollol", 6);
     proc.read(buf, 6);
@@ -28,7 +61,6 @@ int main() {
 
     int br = 0;
     while ((br = proc.read(buf, sizeof(buf) - 1)) == sizeof(buf) - 1) {
-//        std::cerr << br << std::endl;
         buf[br] = '\0';
         std::cout << buf;
     }
