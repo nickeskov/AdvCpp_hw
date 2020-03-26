@@ -56,13 +56,11 @@ void Process::read_exact(void *buf, size_t len) {
     while (offset < len) {
         int bytes_read = read(buf, len);
         if (bytes_read == -1) {
-            std::stringstream errors;
-            errors << strerror(errno) << std::endl;
-            throw std::runtime_error(errors.str());
+            throw errors::ReadError();
         }
         offset += bytes_read;
         if (bytes_read == 0 && len != offset) {
-            throw std::runtime_error("cant read, zero bytes read but buf len is not zero");
+            throw errors::ReadError();
         }
     }
 }

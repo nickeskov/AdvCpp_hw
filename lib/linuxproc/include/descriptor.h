@@ -1,9 +1,6 @@
 #ifndef HW_DESCRIPTOR_H
 #define HW_DESCRIPTOR_H
 
-#include <memory>
-#include <atomic>
-
 namespace linuxproc {
 
 class Descriptor {

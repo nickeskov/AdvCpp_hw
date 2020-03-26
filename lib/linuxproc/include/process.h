@@ -1,20 +1,15 @@
 #ifndef HW_PROCESS_H
 #define HW_PROCESS_H
 
-#include <string>
-#include <vector>
-#include <string_view>
 #include <cstddef>
-#include <cstring>
-#include <sstream>
-#include <stdexcept>
-#include <iostream>
 #include <csignal>
+#include <array>
+#include <string_view>
+#include <algorithm>
+#include <utility>
 
 #include <wait.h>
 #include <unistd.h>
-#include <utility>
-#include <algorithm>
 
 #include "descriptor.h"
 #include "pipe.h"

@@ -66,7 +66,7 @@ include_directories(lib/linuxproc/include)
 
 include_directories(include)
 
-add_executable(hw src/main.cpp)
+add_executable(hw src/main.cpp src/utils.cpp)
 
 target_compile_options(hw PRIVATE -Wall -Wextra -Wpedantic -Werror)
 target_link_libraries(hw linuxproc)
