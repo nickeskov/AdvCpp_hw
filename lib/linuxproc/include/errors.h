@@ -3,7 +3,7 @@
 
 #include <exception>
 
-namespace linuxproc {
+namespace linuxproc::errors {
 
 class BaseError : public std::exception {
   public:

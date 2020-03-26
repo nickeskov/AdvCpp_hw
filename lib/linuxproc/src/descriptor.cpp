@@ -2,19 +2,16 @@
 #include "errors.h"
 
 #include <unistd.h>
-#include <iostream>
 
 namespace linuxproc {
 
-Descriptor::Descriptor(int fd) noexcept: fd_(fd) {
-//    std::cerr << "[" << getpid() << "] create fd=" << fd_ << std::endl;
-}
+Descriptor::Descriptor(int fd) noexcept: fd_(fd) {}
 
 Descriptor::Descriptor(const Descriptor &other) {
     if (other.is_valid()) {
         fd_ = dup(other.fd_);
         if (!is_valid()) {
-            throw DupError();
+            throw errors::DupError();
         }
     }
 }
@@ -60,7 +57,6 @@ int Descriptor::close() noexcept {
     int status = 0;
     if (is_valid()) {
         status = ::close(fd_);
-//        std::cerr << "[" << getpid() << "] clear fd=" << fd_ << std::endl;
         fd_ = -1;
     }
     return status;

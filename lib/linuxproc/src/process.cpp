@@ -38,11 +38,11 @@ void Process::write_exact(const void *buf, size_t len) {
     while (len != 0) {
         int bytes_written = write(buf, len);
         if (bytes_written == -1) {
-            throw WriteError();
+            throw errors::WriteError();
         }
         len -= bytes_written;
         if (bytes_written == 0 && len != 0) {
-            throw WriteError();
+            throw errors::WriteError();
         }
     }
 }
@@ -86,15 +86,15 @@ Process::~Process() noexcept {
 void Process::prepare_to_exec(const Pipe &pipe_to_child, const Pipe &pipe_from_child) {
     auto stdin_dup = Descriptor(dup(STDIN_FILENO));
     if (stdin_dup.data() == -1) {
-        throw DupError();
+        throw errors::DupError();
     }
 
     if (pipe_to_child.get_read_end().dup2(STDIN_FILENO) == -1) {
-        throw DupError();
+        throw errors::DupError();
     }
     if (pipe_from_child.get_write_end().dup2(STDOUT_FILENO) == -1) {
         (void) stdin_dup.dup2(STDIN_FILENO);
-        throw DupError();
+        throw errors::DupError();
     }
 }
 
@@ -104,14 +104,14 @@ void Process::create_proc(std::string_view path, char *const argv[]) {
 
     pid_ = fork();
     if (pid_ == -1) {
-        throw ForkError();
+        throw errors::ForkError();
     }
 
     if (pid_ == 0) {
         prepare_to_exec(pipe_to_child, pipe_from_child);
 
         if (::execv(path.data(), argv) == -1) {
-            throw ExecError();
+            throw errors::ExecError();
         }
     } else {
         fd_process_to_ = std::move(pipe_to_child.get_write_end());

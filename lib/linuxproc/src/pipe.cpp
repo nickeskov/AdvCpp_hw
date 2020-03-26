@@ -12,7 +12,7 @@ Pipe::Pipe() {
     int pipe_fd[2];
 
     if (pipe(pipe_fd) != 0) {
-        throw PipeCreationException();
+        throw errors::PipeCreationException();
     }
 
     read_end_ = Descriptor(pipe_fd[PIPE_READ_END]);
