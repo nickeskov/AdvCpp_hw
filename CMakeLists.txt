@@ -68,5 +68,5 @@ include_directories(include)
 
 add_executable(hw src/main.cpp src/utils.cpp)
 
-target_compile_options(hw PRIVATE -Wall -Wextra -Wpedantic -Werror)
+target_compile_options(hw PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
 target_link_libraries(hw linuxproc)

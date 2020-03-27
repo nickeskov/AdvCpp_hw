@@ -3,6 +3,9 @@
 
 #include <array>
 #include <iostream>
+#include <stdexcept>
+#include <cstring>
+#include <cerrno>
 
 void hw1_test() {
     std::array<char, 100> buf{};
@@ -31,10 +34,14 @@ void hw1_test() {
     proc.close_stdin();
 
     ssize_t br = 0;
-    while ((br = proc.read(buf.data(), buf.size() - 1)) == buf.size() - 1) {
+    while ((br = proc.read(buf.data(), buf.size() - 1)) == ssize_t(buf.size() - 1)) {
         buf[br] = '\0';
         std::cout << buf.data();
     }
+    if (br == -1) {
+        throw std::runtime_error(strerror(errno));
+    }
+
     buf[br] = '\0';
     std::cout << buf.data();
 }

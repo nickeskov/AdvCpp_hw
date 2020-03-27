@@ -54,7 +54,7 @@ if(ENABLE_CPPCHECK)
 
     add_custom_target(
             ${PROJECT_NAME}_check
-            COMMENT "running cppcheck ${PROJECT_NAME}"
+            COMMENT "running cppcheck for ${PROJECT_NAME}"
             COMMAND cppcheck ${${PROJECT_NAME}_CPPCHECK_ARGS}
     )
 endif()
@@ -65,4 +65,4 @@ include_directories(include)
 
 add_library(linuxproc STATIC src/process.cpp src/descriptor.cpp src/pipe.cpp src/errors.cpp)
 
-target_compile_options(linuxproc PRIVATE -Wall -Wextra -Wpedantic -Werror)
+target_compile_options(linuxproc PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)

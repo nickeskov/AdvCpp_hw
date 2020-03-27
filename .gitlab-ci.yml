@@ -8,6 +8,7 @@ stages:
 before_script:
   - apt-get update --yes
   - apt-get install --yes cmake
+  - gcc --version
 
 static_checks:
   stage: static_checks

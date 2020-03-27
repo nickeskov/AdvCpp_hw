@@ -66,7 +66,7 @@ bool Descriptor::is_valid() const noexcept {
     return fd_ > -1;
 }
 
-int Descriptor::dup2(int fd) const   noexcept {
+int Descriptor::dup2(int fd) const noexcept {
     return ::dup2(fd_, fd);
 }
 
