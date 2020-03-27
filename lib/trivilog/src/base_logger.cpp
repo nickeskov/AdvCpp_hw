@@ -1,7 +1,9 @@
 #include "base_logger.h"
+#include "errors.h"
 
 #include <chrono>
 #include <iomanip>
+#include <errors.h>
 
 
 namespace trivilog {
@@ -47,7 +49,7 @@ void BaseLogger::fatal(std::string_view msg) {
 
 bool BaseLogger::set_level(log_level level) noexcept {
     if (level >= log_level::FATAL && level <= log_level::TRACE) {
-        level_.store(static_cast<loglevel_t>(level));
+        level_.store(static_cast<log_level_t>(level));
         return true;
     }
     return false;

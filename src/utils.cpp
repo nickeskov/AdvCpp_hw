@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "process.h"
+#include "trivilog.h"
 
 #include <array>
 #include <iostream>
@@ -44,4 +45,17 @@ void hw1_test() {
 
     buf[br] = '\0';
     std::cout << buf.data();
+}
+
+void hw2_test() {
+    auto log = trivilog::StderrBuffLogger();
+
+    log.info("KEK");
+    log.set_level(trivilog::log_level::ERROR);
+
+    log.info("THIS TEXT CANNOT BE DISPLAYED");
+
+    auto filelog = trivilog::FileLogger("test.log");
+
+    filelog.error("KEK");
 }

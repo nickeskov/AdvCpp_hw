@@ -1,5 +1,5 @@
-#ifndef HW_STDOUT_LOGGER_H
-#define HW_STDOUT_LOGGER_H
+#ifndef HW_TRIVILOG_STDOUT_LOGGER_H
+#define HW_TRIVILOG_STDOUT_LOGGER_H
 
 #include "base_logger.h"
 
@@ -7,9 +7,9 @@ namespace trivilog {
 
 class StdoutLogger : public BaseLogger {
   private:
-    [[nodiscard]] std::ostream &get_ostream() const noexcept override;
+    [[nodiscard]] std::ostream &get_ostream() override;
 };
 
 }
 
-#endif //HW_STDOUT_LOGGER_H
+#endif //HW_TRIVILOG_STDOUT_LOGGER_H

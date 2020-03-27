@@ -4,7 +4,7 @@
 
 namespace trivilog {
 
-std::ostream &StderrLogger::get_ostream() const noexcept {
+std::ostream &StderrLogger::get_ostream() {
     return std::cerr;
 }
 

@@ -1,5 +1,5 @@
-#ifndef HW_STDERR_LOGGER_H
-#define HW_STDERR_LOGGER_H
+#ifndef HW_TRIVILOG_STDERR_LOGGER_H
+#define HW_TRIVILOG_STDERR_LOGGER_H
 
 #include "base_logger.h"
 
@@ -7,9 +7,9 @@ namespace trivilog {
 
 class StderrLogger : public BaseLogger {
   private:
-    [[nodiscard]] std::ostream &get_ostream() const noexcept override;
+    [[nodiscard]] std::ostream &get_ostream() override;
 };
 
 }
 
-#endif //HW_STDERR_LOGGER_H
+#endif //HW_TRIVILOG_STDERR_LOGGER_H

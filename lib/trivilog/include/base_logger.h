@@ -1,12 +1,12 @@
-#ifndef HW_BASE_LOGGER_H
-#define HW_BASE_LOGGER_H
+#ifndef HW_TRIVILOG_BASE_LOGGER_H
+#define HW_TRIVILOG_BASE_LOGGER_H
 
 #include <atomic>
 #include <type_traits>
 #include <string_view>
 #include <memory>
 
-#include "../src/log_level.h"
+#include "log_level.h"
 
 namespace trivilog {
 
@@ -32,11 +32,11 @@ class BaseLogger {
     virtual void flush();
 
   private:
-    using loglevel_t = std::underlying_type<log_level>::type;
+    using log_level_t = std::underlying_type<log_level>::type;
 
-    std::atomic<loglevel_t> level_;
+    std::atomic<log_level_t> level_ = static_cast<log_level_t>(log_level::INFO);
 
-    [[nodiscard]] virtual std::ostream &get_ostream() const noexcept = 0;
+    [[nodiscard]] virtual std::ostream &get_ostream() = 0;
 
     virtual void log(std::string_view msg, log_level level);
 
@@ -45,4 +45,4 @@ class BaseLogger {
 
 }
 
-#endif //HW_BASE_LOGGER_H
+#endif //HW_TRIVILOG_BASE_LOGGER_H
