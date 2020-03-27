@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(hw)
+project(trivilog)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,17 +14,18 @@ message("Build type for ${PROJECT_NAME}: ${CMAKE_BUILD_TYPE}")
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS} \
                         ${GCC_COVERAGE_LINK_FLAGS} \
-                        -O0 -Wall -Wextra -Wpedantic -Werror -ggdb3")
+                        -O0 -ggdb3")
 
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS} \
                     ${GCC_COVERAGE_LINK_FLAGS} \
-                    -O0 -Wall -Wextra -Wpedantic -Werror -ggdb3")
+                    -O0 -ggdb3")
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL Release)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -march=native")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -march=native")
 endif()
+
 
 if (ENABLE_SANITIZE)
     message("Sanitizers ENABLED for ${PROJECT_NAME}")
@@ -39,13 +40,12 @@ if(ENABLE_CPPCHECK)
     # set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
     list(APPEND ${PROJECT_NAME}_CPPCHECK_ARGS
-            --enable=warning,style,performance,portability,unusedFunction
+            --enable=warning,style,performance,portability
             --check-library
             --std=c++11
             --verbose
             --error-exitcode=1
             --language=c++
-            -DMAIN=main
             -I ${PROJECT_SOURCE_DIR}/include
             ${PROJECT_SOURCE_DIR}/include/*.h*
             ${PROJECT_SOURCE_DIR}/src/*.c*
@@ -61,16 +61,8 @@ endif()
 
 # ------------------------------------------------------------------------------
 
-add_subdirectory(lib/linuxproc)
-include_directories(lib/linuxproc/include)
-
-add_subdirectory(lib/trivilog)
-include_directories(lib/trivilog/include)
-
 include_directories(include)
 
-add_executable(hw src/main.cpp src/utils.cpp)
+add_library(trivilog STATIC src/base_logger.cpp src/stdout_logger.cpp src/file_logger.cpp)
 
-target_compile_options(hw PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
-target_link_libraries(hw linuxproc)
-target_link_libraries(hw trivilog)
+target_compile_options(trivilog  PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
