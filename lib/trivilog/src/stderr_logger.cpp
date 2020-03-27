@@ -1,0 +1,11 @@
+#include "stderr_logger.h"
+
+#include <iostream>
+
+namespace trivilog {
+
+std::ostream &StderrLogger::get_ostream() const noexcept {
+    return std::cerr;
+}
+
+}

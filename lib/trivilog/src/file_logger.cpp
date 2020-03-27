@@ -2,4 +2,8 @@
 
 namespace trivilog {
 
+//std::ostream &FileLogger::get_ostream() const {
+//    return <#initializer#>;
+//}
+
 }

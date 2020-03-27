@@ -6,7 +6,7 @@
 #include <string_view>
 #include <memory>
 
-#include "log_level.h"
+#include "../src/log_level.h"
 
 namespace trivilog {
 
@@ -36,7 +36,7 @@ class BaseLogger {
 
     std::atomic<loglevel_t> level_;
 
-    virtual std::ostream &get_ostream() noexcept = 0;
+    [[nodiscard]] virtual std::ostream &get_ostream() const noexcept = 0;
 
     virtual void log(std::string_view msg, log_level level);
 
