@@ -26,7 +26,8 @@ constexpr inline bool can_be_string_view_v = std::is_convertible_v<pack_t<Args..
 class Process {
   public:
 
-    template<typename ...Args, typename = void>
+    template<typename ...Args,
+            typename = std::enable_if_t<can_be_string_view_v<Args...>, std::string_view>>
     explicit Process(std::string_view path, Args &&... args);
 
     Process(std::string_view path, char *const argv[]);
@@ -72,8 +73,7 @@ class Process {
 template<typename ...Args>
 using pack_t = typename std::common_type<typename std::decay<Args>::type ...>::type;
 
-template<typename ...Args,
-        typename = std::enable_if_t<can_be_string_view_v<Args...>, std::string_view>>
+template<typename ...Args, typename>
 Process::Process(std::string_view path, Args &&... args) {
     std::initializer_list<std::string_view> args_views = {
             std::forward<Args>(args)...,
