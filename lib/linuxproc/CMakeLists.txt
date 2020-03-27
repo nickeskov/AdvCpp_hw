@@ -46,7 +46,7 @@ if(ENABLE_CPPCHECK)
             --verbose
             --error-exitcode=1
             --language=c++
-            -I ../../include
+            -I ${PROJECT_SOURCE_DIR}/include
             ${PROJECT_SOURCE_DIR}/include/*.h*
             ${PROJECT_SOURCE_DIR}/src/*.c*
             ${PROJECT_SOURCE_DIR}/test/*.c*
