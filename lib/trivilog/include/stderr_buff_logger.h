@@ -6,6 +6,9 @@
 namespace trivilog {
 
 class StderrBuffLogger : public BaseLogger {
+  public:
+    ~StderrBuffLogger() noexcept override = default;
+
   private:
     [[nodiscard]] std::ostream &get_ostream() override;
 };

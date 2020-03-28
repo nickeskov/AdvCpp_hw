@@ -12,6 +12,8 @@ enum class log_level : unsigned int {
     TRACE = 6
 };
 
+using log_level_t = std::underlying_type_t<log_level>;
+
 }
 
 #endif //HW_TRIVILOG_LOG_LEVEL_H

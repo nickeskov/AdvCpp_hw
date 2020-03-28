@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <string>
+#include <ios>
 
 #include "base_logger.h"
 
@@ -12,11 +13,13 @@ class FileLogger : public BaseLogger {
   public:
     explicit FileLogger(std::ofstream &&ofstream);
 
-    explicit FileLogger(const std::string &filename, std::ios_base::openmode openmode = std::ios_base::out);
+    explicit FileLogger(const std::string &filename, std::ios::openmode openmode = std::ios::out);
 
     FileLogger(const FileLogger &) = delete;
 
     FileLogger &operator=(const FileLogger &) = delete;
+
+    ~FileLogger() noexcept override = default;
 
   private:
     std::ofstream ofstream_;

@@ -10,5 +10,6 @@
 #include "stderr_logger.h"
 #include "stderr_buff_logger.h"
 #include "file_logger.h"
+#include "global_logger.h"
 
 #endif //HW_TRIVILOG_TRIVILOG_H

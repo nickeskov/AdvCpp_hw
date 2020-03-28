@@ -48,14 +48,20 @@ void hw1_test() {
 }
 
 void hw2_test() {
-    auto log = trivilog::StderrBuffLogger();
+    auto log = trivilog::StdoutLogger();
 
     log.info("KEK");
+    log.flush();
     log.set_level(trivilog::log_level::ERROR);
 
     log.info("THIS TEXT CANNOT BE DISPLAYED");
 
     auto filelog = trivilog::FileLogger("test.log");
-
     filelog.error("KEK");
+
+    trivilog::global::Logger::warn("THIS IS DISPLAYED BY GLOBAL LOGGER");
+
+    trivilog::global::Logger::get_instance().set_global_logger<trivilog::FileLogger>("test2.log");
+
+    trivilog::global::Logger::warn("THIS IS DISPLAYED BY GLOBAL LOGGER");
 }

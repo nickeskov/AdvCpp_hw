@@ -1,10 +1,7 @@
 #include "base_logger.h"
-#include "errors.h"
 
 #include <chrono>
 #include <iomanip>
-#include <errors.h>
-
 
 namespace trivilog {
 

@@ -4,7 +4,6 @@
 #include <atomic>
 #include <type_traits>
 #include <string_view>
-#include <memory>
 
 #include "log_level.h"
 
@@ -31,16 +30,16 @@ class BaseLogger {
 
     virtual void flush();
 
-  private:
-    using log_level_t = std::underlying_type<log_level>::type;
+    virtual ~BaseLogger() noexcept = default;
 
+  private:
     std::atomic<log_level_t> level_ = static_cast<log_level_t>(log_level::INFO);
 
     [[nodiscard]] virtual std::ostream &get_ostream() = 0;
 
     virtual void log(std::string_view msg, log_level level);
 
-    void log_to_ostream(std::string_view log_level_name, std::string_view msg);
+    virtual void log_to_ostream(std::string_view log_level_name, std::string_view msg);
 };
 
 }
