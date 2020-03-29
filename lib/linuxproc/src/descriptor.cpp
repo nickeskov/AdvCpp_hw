@@ -5,7 +5,11 @@
 
 namespace linuxproc {
 
-Descriptor::Descriptor(int fd) noexcept: fd_(fd) {}
+Descriptor::Descriptor(int &fd) noexcept: fd_(fd) {
+    fd = -1;
+}
+
+Descriptor::Descriptor(int &&fd) noexcept: Descriptor(fd) {}
 
 Descriptor::Descriptor(const Descriptor &other) {
     if (other.is_valid()) {

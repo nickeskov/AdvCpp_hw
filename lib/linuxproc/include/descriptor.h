@@ -7,7 +7,9 @@ class Descriptor {
   public:
     Descriptor() noexcept = default;
 
-    explicit Descriptor(int fd) noexcept;
+    explicit Descriptor(int &fd) noexcept;
+
+    explicit Descriptor(int &&fd) noexcept;
 
     Descriptor(const Descriptor &other);
 
