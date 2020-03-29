@@ -63,6 +63,8 @@ endif()
 
 include_directories(include)
 
-add_library(trivilog STATIC src/base_logger.cpp src/stdout_logger.cpp src/file_logger.cpp src/stderr_logger.cpp src/stderr_buff_logger.cpp include/trivilog.h include/trivilog_errors.h include/global_logger.h src/global_logger.cpp)
+aux_source_directory(src/ TRIVILOG_SRC)
+
+add_library(trivilog STATIC ${TRIVILOG_SRC})
 
 target_compile_options(trivilog  PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
