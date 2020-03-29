@@ -1,36 +1,81 @@
 #ifndef HW_ERRORS_H
 #define HW_ERRORS_H
 
-#include <exception>
+#include <cerrno>
+#include <stdexcept>
+#include <string_view>
 
 namespace linuxproc::errors {
 
-class BaseError : public std::exception {
+class RuntimeError : public std::runtime_error {
   public:
-    [[nodiscard]] const char *what() const noexcept override;
+    explicit RuntimeError(const std::string_view &what_arg);
+
+    [[nodiscard]] int errno_code() const noexcept;
+
+  private:
+    int errno_code_ = errno;
 };
 
-class PipeError : public BaseError {};
+class PipeError : public RuntimeError {
+  public:
+    explicit PipeError(const std::string_view &what_arg);
+};
 
-class DescriptorError : public BaseError {};
+class DescriptorError : public RuntimeError {
+  public:
+    explicit DescriptorError(const std::string_view &what_arg);
+};
 
-class IoError : public BaseError {};
+class IoError : public RuntimeError {
+  public:
+    explicit IoError(const std::string_view &what_arg);
+};
 
-class ForkError : public BaseError {};
+class ForkError : public RuntimeError {
+  public:
+    explicit ForkError(const std::string_view &what_arg);
+};
 
-class WriteError : public IoError {};
+class WriteError : public IoError {
+  public:
+    explicit WriteError(const std::string_view &what_arg);
+};
 
-class ReadError : public IoError {};
+class WriteToClosedEndpointError : public WriteError {
+  public:
+    explicit WriteToClosedEndpointError(const std::string_view &what_arg);
+};
 
-class EofError : public IoError {};
+class ReadError : public IoError {
+  public:
+    explicit ReadError(const std::string_view &what_arg);
+};
 
-class ExecError : public BaseError {};
+class EofError : public ReadError {
+  public:
+    explicit EofError(const std::string_view &what_arg);
+};
 
-class PipeCreationException : public PipeError {};
+class ExecError : public RuntimeError {
+  public:
+    explicit ExecError(const std::string_view &what_arg);
+};
 
-class DupError : public DescriptorError {};
+class PipeCreationError : public PipeError {
+  public:
+    explicit PipeCreationError(const std::string_view &what_arg);
+};
 
-class CloseError : public DescriptorError {};
+class DupError : public DescriptorError {
+  public:
+    explicit DupError(const std::string_view &what_arg);
+};
+
+class CloseError : public DescriptorError {
+  public:
+    explicit CloseError(const std::string_view &what_arg);
+};
 
 }
 

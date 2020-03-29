@@ -11,8 +11,12 @@ Descriptor::Descriptor(const Descriptor &other) {
     if (other.is_valid()) {
         fd_ = dup(other.fd_);
         if (!is_valid()) {
-            throw errors::DupError();
+            std::string msg = "cannot dup descriptor with value ";
+            msg += std::to_string(other.fd_);
+            throw errors::DupError(msg);
         }
+    } else {
+        fd_ = other.fd_;
     }
 }
 
@@ -54,7 +58,7 @@ Descriptor::~Descriptor() noexcept {
 }
 
 int Descriptor::close() noexcept {
-    int status = 0;
+    int status = -1;
     if (is_valid()) {
         status = ::close(fd_);
         fd_ = -1;

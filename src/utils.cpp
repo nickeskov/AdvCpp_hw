@@ -26,7 +26,7 @@ void hw1_test() {
     std::cout << std::boolalpha;
     std::cout << proc.is_readable() << std::endl;
 
-    proc = linuxproc::Process("/bin/bash", std::string_view("/bin/bash"));
+    proc = linuxproc::Process("/bin/bash", "/bin/bash");
 
     std::string_view cpuinfo = "/bin/cat /proc/cpuinfo\n";
     proc.write_exact(cpuinfo.data(), cpuinfo.length());
