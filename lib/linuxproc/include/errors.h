@@ -9,7 +9,7 @@ namespace linuxproc::errors {
 
 class RuntimeError : public std::runtime_error {
   public:
-    explicit RuntimeError(const std::string_view &what_arg);
+    explicit RuntimeError(std::string_view what_arg);
 
     [[nodiscard]] int errno_code() const noexcept;
 
@@ -19,62 +19,62 @@ class RuntimeError : public std::runtime_error {
 
 class PipeError : public RuntimeError {
   public:
-    explicit PipeError(const std::string_view &what_arg);
+    explicit PipeError(std::string_view what_arg);
 };
 
 class DescriptorError : public RuntimeError {
   public:
-    explicit DescriptorError(const std::string_view &what_arg);
+    explicit DescriptorError(std::string_view what_arg);
 };
 
 class IoError : public RuntimeError {
   public:
-    explicit IoError(const std::string_view &what_arg);
+    explicit IoError(std::string_view what_arg);
 };
 
 class ForkError : public RuntimeError {
   public:
-    explicit ForkError(const std::string_view &what_arg);
+    explicit ForkError(std::string_view what_arg);
 };
 
 class WriteError : public IoError {
   public:
-    explicit WriteError(const std::string_view &what_arg);
+    explicit WriteError(std::string_view what_arg);
 };
 
 class WriteToClosedEndpointError : public WriteError {
   public:
-    explicit WriteToClosedEndpointError(const std::string_view &what_arg);
+    explicit WriteToClosedEndpointError(std::string_view what_arg);
 };
 
 class ReadError : public IoError {
   public:
-    explicit ReadError(const std::string_view &what_arg);
+    explicit ReadError(std::string_view what_arg);
 };
 
 class EofError : public ReadError {
   public:
-    explicit EofError(const std::string_view &what_arg);
+    explicit EofError(std::string_view what_arg);
 };
 
 class ExecError : public RuntimeError {
   public:
-    explicit ExecError(const std::string_view &what_arg);
+    explicit ExecError(std::string_view what_arg);
 };
 
 class PipeCreationError : public PipeError {
   public:
-    explicit PipeCreationError(const std::string_view &what_arg);
+    explicit PipeCreationError(std::string_view what_arg);
 };
 
 class DupError : public DescriptorError {
   public:
-    explicit DupError(const std::string_view &what_arg);
+    explicit DupError(std::string_view what_arg);
 };
 
 class CloseError : public DescriptorError {
   public:
-    explicit CloseError(const std::string_view &what_arg);
+    explicit CloseError(std::string_view what_arg);
 };
 
 }

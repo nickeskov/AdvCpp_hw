@@ -17,25 +17,19 @@
 
 namespace linuxproc {
 
-template<typename ...Args>
-using pack_t = typename std::common_type<typename std::decay<Args>::type ...>::type;
-
-template<typename ...Args>
-constexpr inline bool can_construct_string_view_v = std::is_constructible_v<std::string_view, Args...>;
-
 class Process {
   public:
     template<typename ...Args,
-            typename = std::enable_if_t<can_construct_string_view_v<pack_t<Args...>>>>
-    explicit Process(const std::string_view &path, Args &&... args) {
-        char *const arguments[] = {
-                const_cast<char *>(std::string_view(std::forward<Args>(args)).data())...,
+            typename = std::enable_if_t<std::is_constructible_v<std::string_view, Args...>>>
+    explicit Process(std::string_view path, Args &&... args) {
+        char *const arguments[]{
+                const_cast<char *>(std::string_view{args}.data())...,
                 nullptr
         };
         create_proc(path, arguments);
     }
 
-    Process(const std::string_view &path, char *const argv[]);
+    Process(std::string_view path, char *const argv[]);
 
     Process(const Process &) = delete;
 
@@ -73,7 +67,7 @@ class Process {
 
     static void prepare_to_exec(const Pipe &pipe_to_child, const Pipe &pipe_from_child);
 
-    void create_proc(const std::string_view &path, char *const argv[]);
+    void create_proc(std::string_view path, char *const argv[]);
 };
 
 }

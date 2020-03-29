@@ -7,7 +7,7 @@
 
 namespace linuxproc {
 
-Process::Process(const std::string_view &path, char *const argv[]) {
+Process::Process(std::string_view path, char *const argv[]) {
     create_proc(path, argv);
 }
 
@@ -53,21 +53,13 @@ void Process::write_exact(const void *buf, size_t len) {
 
 size_t Process::read(void *buf, size_t len) {
     ssize_t bytes_read = 0;
-    if (is_readable_) {
+    if (is_readable() && len != 0) {
         bytes_read = ::read(fd_process_from_.data(), buf, len);
-        switch (bytes_read) {
-            case 0: {
-                if (len == 0) {
-                    is_readable_ = false;
-                }
-                break;
-            }
-            case -1: {
-                throw errors::ReadError("read error occurs while reading from process pipe");
-            }
-            default: {
-                break;
-            }
+        if (bytes_read == 0) {
+            is_readable_ = false;
+        }
+        if (bytes_read == -1) {
+            throw errors::ReadError("read error occurs while reading from process pipe");
         }
     }
     return bytes_read;
@@ -87,7 +79,9 @@ bool Process::is_readable() const noexcept {
 }
 
 void Process::close_stdin() {
-    fd_process_to_.close();
+    if (fd_process_to_.is_valid() && fd_process_to_.close() != 0) {
+        throw errors::CloseError("close error occurs while closing write pipe for process");
+    }
 }
 
 Process::~Process() noexcept {
@@ -116,7 +110,7 @@ void Process::prepare_to_exec(const Pipe &pipe_to_child, const Pipe &pipe_from_c
     }
 }
 
-void Process::create_proc(const std::string_view &path, char *const argv[]) {
+void Process::create_proc(std::string_view path, char *const argv[]) {
     Pipe pipe_to_child;
     Pipe pipe_from_child;
 
