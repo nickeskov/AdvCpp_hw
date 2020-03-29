@@ -12,4 +12,17 @@
 #include "file_logger.h"
 #include "global_logger.h"
 
+#include <memory>
+#include <type_traits>
+
+namespace trivilog {
+
+template <typename T, typename ...Args,
+        std::enable_if_t<std::is_base_of_v<BaseLogger, T>>* = nullptr>
+std::unique_ptr<T> create_logger(Args&&... args) {
+    return std::make_unique<T>(std::forward<Args>(args)...);
+}
+
+}
+
 #endif //HW_TRIVILOG_TRIVILOG_H

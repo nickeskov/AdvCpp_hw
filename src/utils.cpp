@@ -57,11 +57,18 @@ void hw2_test() {
     log.info("THIS TEXT CANNOT BE DISPLAYED");
 
     auto filelog = trivilog::FileLogger("test.log");
+
     filelog.error("KEK");
 
     trivilog::global::Logger::warn("THIS IS DISPLAYED BY GLOBAL LOGGER");
 
-    trivilog::global::Logger::get_instance().set_global_logger<trivilog::FileLogger>("test2.log");
+    trivilog::global::Logger::set_global_logger<trivilog::FileLogger>("test2.log");
 
     trivilog::global::Logger::warn("THIS IS DISPLAYED BY GLOBAL LOGGER");
+
+    auto logptr = trivilog::create_logger<trivilog::StderrLogger>();
+
+    trivilog::global::Logger::set_global_logger(std::move(logptr));
+
+    trivilog::global::Logger::warn("THIS IS DISPLAYED BY NEW GLOBAL LOGGER");
 }

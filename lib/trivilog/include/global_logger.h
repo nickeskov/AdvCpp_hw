@@ -27,12 +27,11 @@ class Logger final {
 
     [[nodiscard]] BaseLogger &get_global_logger();
 
-    void set_global_logger(std::unique_ptr<BaseLogger> new_logger);
+    static void set_global_logger(std::unique_ptr<BaseLogger> new_logger);
 
     template<typename T, typename ...Args>
-    void set_global_logger(Args &&... args) {
-        std::lock_guard guard(mutex_);
-        global_logger_ptr = std::make_unique<T>(std::forward<Args>(args)...);
+    static void set_global_logger(Args &&... args) {
+        get_instance().set_global_logger_impl<T>(std::forward<Args>(args)...);
     }
 
     Logger(const Logger &) = delete;
@@ -49,6 +48,14 @@ class Logger final {
 
     Logger() = default;
 
+    void set_global_logger_impl(std::unique_ptr<BaseLogger> new_logger);
+
+    template<typename T, typename ...Args>
+    void set_global_logger_impl(Args &&... args) {
+        std::lock_guard guard(mutex_);
+        global_logger_ptr = std::make_unique<T>(std::forward<Args>(args)...);
+    }
+
     void trace_impl(std::string_view msg);
 
     void debug_impl(std::string_view msg);
@@ -60,7 +67,6 @@ class Logger final {
     void error_impl(std::string_view msg);
 
     void fatal_impl(std::string_view msg);
-
 };
 
 }
