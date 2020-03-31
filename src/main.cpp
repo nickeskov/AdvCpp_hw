@@ -1,6 +1,13 @@
-#include <iostream>
+#include "utils.h"
+
+#include <exception>
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    try {
+        hw1_test();
+    }
+    catch (std::exception &) {
+        return 1;
+    }
     return 0;
 }
