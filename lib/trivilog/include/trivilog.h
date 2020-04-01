@@ -18,7 +18,7 @@
 namespace trivilog {
 
 template <typename T, typename ...Args,
-        std::enable_if_t<std::is_base_of_v<BaseLogger, T>>* = nullptr>
+        std::enable_if_t<std::is_base_of_v<BaseLogger, T>, T>* = nullptr>
 std::unique_ptr<T> create_logger(Args&&... args) {
     return std::make_unique<T>(std::forward<Args>(args)...);
 }
