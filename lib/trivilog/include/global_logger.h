@@ -29,7 +29,8 @@ class Logger final {
 
     static void set_global_logger(std::unique_ptr<BaseLogger> new_logger);
 
-    template<typename T, typename ...Args>
+    template<typename T, typename ...Args,
+            typename = std::enable_if_t<std::is_base_of_v<BaseLogger, T>>>
     static void set_global_logger(Args &&... args) {
         get_instance().set_global_logger_impl<T>(std::forward<Args>(args)...);
     }
@@ -50,10 +51,10 @@ class Logger final {
 
     void set_global_logger_impl(std::unique_ptr<BaseLogger> new_logger);
 
-    template<typename T, typename ...Args>
+    template<typename T, typename ...Args,
+            typename = std::enable_if_t<std::is_base_of_v<BaseLogger, T>>>
     void set_global_logger_impl(Args &&... args) {
-        std::lock_guard guard(mutex_);
-        global_logger_ptr = std::make_unique<T>(std::forward<Args>(args)...);
+        set_global_logger_impl(std::make_unique<T>(std::forward<Args>(args)...));
     }
 
     void trace_impl(std::string_view msg);

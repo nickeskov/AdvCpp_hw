@@ -4,15 +4,13 @@
 namespace trivilog {
 
 enum class log_level : unsigned int {
-    FATAL = 1,
-    ERROR = 2,
-    WARN = 3,
-    INFO = 4,
-    DEBUG = 5,
-    TRACE = 6
+    FATAL = 0,
+    ERROR,
+    WARN,
+    INFO,
+    DEBUG,
+    TRACE
 };
-
-using log_level_t = std::underlying_type_t<log_level>;
 
 }
 

@@ -44,12 +44,8 @@ void BaseLogger::fatal(std::string_view msg) {
     log(msg, log_level::FATAL);
 }
 
-bool BaseLogger::set_level(log_level level) noexcept {
-    if (level >= log_level::FATAL && level <= log_level::TRACE) {
-        level_.store(static_cast<log_level_t>(level));
-        return true;
-    }
-    return false;
+void BaseLogger::set_level(log_level level) noexcept {
+    level_.store(level);
 }
 
 log_level BaseLogger::get_level() const noexcept {

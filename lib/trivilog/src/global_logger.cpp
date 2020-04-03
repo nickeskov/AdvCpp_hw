@@ -12,22 +12,6 @@ BaseLogger &Logger::get_global_logger() {
     return *global_logger_ptr;
 }
 
-void Logger::set_global_logger_impl(std::unique_ptr<BaseLogger> new_logger) {
-    std::lock_guard guard(mutex_);
-    global_logger_ptr.swap(new_logger);
-}
-
-
-void Logger::error_impl(std::string_view msg) {
-    std::lock_guard guard(mutex_);
-    global_logger_ptr->error(msg);
-}
-
-void Logger::fatal_impl(std::string_view msg) {
-    std::lock_guard guard(mutex_);
-    global_logger_ptr->fatal(msg);
-}
-
 void Logger::trace(std::string_view msg) {
     get_instance().trace_impl(msg);
 }
@@ -52,6 +36,15 @@ void Logger::fatal(std::string_view msg) {
     get_instance().fatal_impl(msg);
 }
 
+void Logger::set_global_logger(std::unique_ptr<BaseLogger> new_logger) {
+    get_instance().set_global_logger_impl(std::move(new_logger));
+}
+
+void Logger::set_global_logger_impl(std::unique_ptr<BaseLogger> new_logger) {
+    std::lock_guard guard(mutex_);
+    global_logger_ptr.swap(new_logger);
+}
+
 void Logger::trace_impl(std::string_view msg) {
     std::lock_guard guard(mutex_);
     global_logger_ptr->trace(msg);
@@ -72,8 +65,14 @@ void Logger::warn_impl(std::string_view msg) {
     global_logger_ptr->warn(msg);
 }
 
-void Logger::set_global_logger(std::unique_ptr<BaseLogger> new_logger) {
-    get_instance().set_global_logger_impl(std::move(new_logger));
+void Logger::error_impl(std::string_view msg) {
+    std::lock_guard guard(mutex_);
+    global_logger_ptr->error(msg);
+}
+
+void Logger::fatal_impl(std::string_view msg) {
+    std::lock_guard guard(mutex_);
+    global_logger_ptr->fatal(msg);
 }
 
 }

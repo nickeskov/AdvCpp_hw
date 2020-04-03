@@ -24,7 +24,7 @@ class BaseLogger {
 
     void error(std::string_view msg);
 
-    bool set_level(log_level level) noexcept;
+    void set_level(log_level level) noexcept;
 
     [[nodiscard]] log_level get_level() const noexcept;
 
@@ -33,7 +33,7 @@ class BaseLogger {
     virtual ~BaseLogger() noexcept = default;
 
   private:
-    std::atomic<log_level_t> level_ = static_cast<log_level_t>(log_level::INFO);
+    std::atomic<log_level> level_ = log_level::INFO;
 
     [[nodiscard]] virtual std::ostream &get_ostream() = 0;
 
