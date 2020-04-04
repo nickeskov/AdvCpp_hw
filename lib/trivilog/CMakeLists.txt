@@ -72,6 +72,6 @@ add_library(trivilog STATIC
         src/stderr_logger.cpp
         src/stdout_logger.cpp)
 
-target_include_directories(trivilog PRIVATE include)
+target_include_directories(trivilog PUBLIC include)
 
 target_compile_options(trivilog PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)

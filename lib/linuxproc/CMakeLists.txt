@@ -26,6 +26,7 @@ if (CMAKE_BUILD_TYPE STREQUAL Release)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -march=native")
 endif()
 
+option(ENABLE_SANITIZE "Enable sanitizers to ${PROJECT_NAME} target(s)" OFF)
 
 if (ENABLE_SANITIZE)
     message("Sanitizers ENABLED for ${PROJECT_NAME}")
@@ -33,6 +34,8 @@ if (ENABLE_SANITIZE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_SANITIZE_FLAGS}")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCC_SANITIZE_FLAGS}")
 endif()
+
+option(ENABLE_CPPCHECK "Enable cppcheck checker as custom target ${PROJECT_NAME}_check" OFF)
 
 if(ENABLE_CPPCHECK)
     message("CPPCHECK ENABLED for ${PROJECT_NAME}")
@@ -61,8 +64,12 @@ endif()
 
 # ------------------------------------------------------------------------------
 
-include_directories(include)
+add_library(linuxproc STATIC
+        src/process.cpp
+        src/descriptor.cpp
+        src/pipe.cpp
+        src/errors.cpp)
 
-add_library(linuxproc STATIC src/process.cpp src/descriptor.cpp src/pipe.cpp src/errors.cpp)
+target_include_directories(linuxproc PUBLIC include)
 
 target_compile_options(linuxproc PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)

@@ -21,6 +21,8 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
                     -O0 -Wall -Wextra -Wpedantic -Werror -ggdb3")
 endif()
 
+option(ENABLE_SANITIZE "Enable sanitizers to ${PROJECT_NAME} target(s)" OFF)
+
 if (CMAKE_BUILD_TYPE STREQUAL Release)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -march=native")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -march=native")
@@ -32,6 +34,8 @@ if (ENABLE_SANITIZE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_SANITIZE_FLAGS}")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCC_SANITIZE_FLAGS}")
 endif()
+
+option(ENABLE_CPPCHECK "Enable cppcheck checker as custom target ${PROJECT_NAME}_check" OFF)
 
 if(ENABLE_CPPCHECK)
     message("CPPCHECK ENABLED for ${PROJECT_NAME}")
@@ -62,15 +66,15 @@ endif()
 # ------------------------------------------------------------------------------
 
 add_subdirectory(lib/linuxproc)
-include_directories(lib/linuxproc/include)
-
 add_subdirectory(lib/trivilog)
-include_directories(lib/trivilog/include)
 
-include_directories(include)
+add_executable(hw
+        src/main.cpp
+        src/utils.cpp)
 
-add_executable(hw src/main.cpp src/utils.cpp)
+target_include_directories(hw PRIVATE include)
 
-target_compile_options(hw PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
 target_link_libraries(hw linuxproc)
 target_link_libraries(hw trivilog)
+
+target_compile_options(hw PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
