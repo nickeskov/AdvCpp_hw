@@ -5,6 +5,7 @@
 int main() {
     try {
         hw1_test();
+        hw2_test();
     }
     catch (std::exception &) {
         return 1;

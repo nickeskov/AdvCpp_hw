@@ -1,0 +1,1 @@
+# trivilog - simple logging library

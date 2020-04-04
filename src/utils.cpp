@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "process.h"
+#include "trivilog.h"
 
 #include <array>
 #include <iostream>
@@ -44,4 +45,30 @@ void hw1_test() {
 
     buf[br] = '\0';
     std::cout << buf.data();
+}
+
+void hw2_test() {
+    auto log = trivilog::StdoutLogger();
+
+    log.info("KEK");
+    log.flush();
+    log.set_level(trivilog::log_level::ERROR);
+
+    log.info("THIS TEXT CANNOT BE DISPLAYED");
+
+    auto filelog = trivilog::FileLogger("test.log");
+
+    filelog.error("KEK");
+
+    trivilog::global::Logger::warn("THIS IS DISPLAYED BY GLOBAL LOGGER");
+
+    trivilog::global::Logger::set_global_logger<trivilog::FileLogger>("test2.log");
+
+    trivilog::global::Logger::warn("THIS IS DISPLAYED BY GLOBAL LOGGER");
+
+    auto logptr = trivilog::create_logger<trivilog::StderrLogger>();
+
+    trivilog::global::Logger::set_global_logger(std::move(logptr));
+
+    trivilog::global::Logger::warn("THIS IS DISPLAYED BY NEW GLOBAL LOGGER");
 }
