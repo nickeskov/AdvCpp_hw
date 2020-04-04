@@ -4,6 +4,7 @@ stages:
   - static_checks
   - build
   - run
+  - memcheck
 
 before_script:
   - apt-get update --yes
@@ -25,3 +26,9 @@ run:
   stage: run
   script:
     - /bin/bash scripts/run.sh
+
+memcheck:
+  stage: memcheck
+  script:
+    - apt-get install --yes valgrind
+    - /bin/bash scripts/run_memcheck.sh
