@@ -13,6 +13,8 @@ class RuntimeError : public std::runtime_error {
 
     [[nodiscard]] int errno_code() const noexcept;
 
+    ~RuntimeError() override = default;
+
   private:
     int errno_code_ = errno;
 };
