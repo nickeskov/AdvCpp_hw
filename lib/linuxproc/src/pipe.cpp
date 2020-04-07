@@ -1,5 +1,5 @@
 #include "pipe.h"
-#include "errors.h"
+#include "linuxproc_errors.h"
 
 #include <unistd.h>
 

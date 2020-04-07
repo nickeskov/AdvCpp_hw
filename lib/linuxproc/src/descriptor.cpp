@@ -1,5 +1,5 @@
 #include "descriptor.h"
-#include "errors.h"
+#include "linuxproc_errors.h"
 
 #include <unistd.h>
 

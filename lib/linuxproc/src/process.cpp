@@ -1,5 +1,5 @@
 #include "process.h"
-#include "errors.h"
+#include "linuxproc_errors.h"
 
 #include <sstream>
 #include <algorithm>

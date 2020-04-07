@@ -68,7 +68,7 @@ add_library(linuxproc STATIC
         src/process.cpp
         src/descriptor.cpp
         src/pipe.cpp
-        src/errors.cpp)
+        src/linuxproc_errors.cpp)
 
 target_include_directories(linuxproc PUBLIC include)
 

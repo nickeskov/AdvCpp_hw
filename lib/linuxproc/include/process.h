@@ -13,7 +13,7 @@
 
 #include "descriptor.h"
 #include "pipe.h"
-#include "errors.h"
+#include "linuxproc_errors.h"
 
 namespace linuxproc {
 

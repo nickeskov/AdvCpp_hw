@@ -1,4 +1,4 @@
-#include "errors.h"
+#include "linuxproc_errors.h"
 
 namespace linuxproc::errors {
 
