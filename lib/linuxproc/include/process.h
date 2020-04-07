@@ -1,5 +1,5 @@
-#ifndef HW_PROCESS_H
-#define HW_PROCESS_H
+#ifndef HW_LINUXPROC_PROCESS_H
+#define HW_LINUXPROC_PROCESS_H
 
 #include <cstddef>
 #include <csignal>
@@ -72,4 +72,4 @@ class Process {
 
 }
 
-#endif //HW_PROCESS_H
+#endif //HW_LINUXPROC_PROCESS_H

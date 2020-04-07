@@ -1,5 +1,5 @@
-#ifndef HW_PIPE_H
-#define HW_PIPE_H
+#ifndef HW_LINUXPROC_PIPE_H
+#define HW_LINUXPROC_PIPE_H
 
 #include "descriptor.h"
 

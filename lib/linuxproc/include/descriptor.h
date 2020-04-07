@@ -1,5 +1,5 @@
-#ifndef HW_DESCRIPTOR_H
-#define HW_DESCRIPTOR_H
+#ifndef HW_LINUXPROC_DESCRIPTOR_H
+#define HW_LINUXPROC_DESCRIPTOR_H
 
 namespace linuxproc {
 
@@ -39,4 +39,4 @@ class Descriptor {
 
 }
 
-#endif //HW_DESCRIPTOR_H
+#endif //HW_LINUXPROC_DESCRIPTOR_H

@@ -1,5 +1,5 @@
-#ifndef HW_LINUXPROC_ERRORS_H
-#define HW_LINUXPROC_ERRORS_H
+#ifndef HW_LINUXPROC_LINUXPROC_ERRORS_H
+#define HW_LINUXPROC_LINUXPROC_ERRORS_H
 
 #include <cerrno>
 #include <stdexcept>
@@ -79,4 +79,4 @@ class CloseError : public DescriptorError {
 
 }
 
-#endif //HW_LINUXPROC_ERRORS_H
+#endif //HW_LINUXPROC_LINUXPROC_ERRORS_H
