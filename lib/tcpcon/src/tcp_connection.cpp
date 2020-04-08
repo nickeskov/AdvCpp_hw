@@ -184,8 +184,8 @@ uint16_t Connection::get_src_port() const noexcept {
 std::string Connection::to_string() const {
     return R"({"dst_addr"=")" + get_dst_addr()
            + R"(","dst_port"=)" + std::to_string(get_dst_port())
-           + R"(, src_addr=")" + get_src_addr()
-           + R"(", srt_port=)" + std::to_string(get_src_port()) + "}";
+           + R"(,"src_addr"=")" + get_src_addr()
+           + R"(","src_port"=)" + std::to_string(get_src_port()) + "}";
 }
 
 }
