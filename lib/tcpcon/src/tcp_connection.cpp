@@ -144,7 +144,7 @@ Connection::~Connection() noexcept {
     }
 }
 
-Connection::Connection(linuxproc::Descriptor &&endpoint, std::string &&dst_addr, uint16_t dst_port)
+Connection::Connection(unixprimwrap::Descriptor &&endpoint, std::string &&dst_addr, uint16_t dst_port)
         : sock_fd_(std::move(endpoint)), dst_addr_(std::move(dst_addr)), dst_port_(dst_port) {
     set_src_endpoint();
 }

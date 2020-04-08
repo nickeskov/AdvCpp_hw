@@ -55,7 +55,7 @@ class Connection {
     ~Connection() noexcept;
 
   private:
-    linuxproc::Descriptor sock_fd_;
+    unixprimwrap::Descriptor sock_fd_;
 
     std::string dst_addr_;
     std::string src_addr_;
@@ -67,7 +67,7 @@ class Connection {
 
     friend class Server;
 
-    Connection(linuxproc::Descriptor &&endpoint, std::string &&dst_addr, uint16_t dst_port);
+    Connection(unixprimwrap::Descriptor &&endpoint, std::string &&dst_addr, uint16_t dst_port);
 
     void set_src_endpoint();
 };

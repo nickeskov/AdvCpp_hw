@@ -19,11 +19,6 @@ class RuntimeError : public std::runtime_error {
     int errno_code_ = errno;
 };
 
-class PipeError : public RuntimeError {
-  public:
-    explicit PipeError(std::string_view what_arg);
-};
-
 class DescriptorError : public RuntimeError {
   public:
     explicit DescriptorError(std::string_view what_arg);
@@ -64,17 +59,12 @@ class ExecError : public RuntimeError {
     explicit ExecError(std::string_view what_arg);
 };
 
-class PipeCreationError : public PipeError {
-  public:
-    explicit PipeCreationError(std::string_view what_arg);
-};
-
 class DupError : public DescriptorError {
   public:
     explicit DupError(std::string_view what_arg);
 };
 
-class CloseError : public DescriptorError {
+class CloseError : public RuntimeError {
   public:
     explicit CloseError(std::string_view what_arg);
 };

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(linuxproc)
+project(unixprimwrap)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -64,12 +64,11 @@ endif ()
 
 # ------------------------------------------------------------------------------
 
-add_library(linuxproc STATIC
-        src/process.cpp
-        src/linuxproc_errors.cpp)
+add_library(unixprimwrap STATIC
+        src/pipe.cpp
+        src/descriptor.cpp
+        src/unixprimwrap_errors.cpp)
 
-target_include_directories(linuxproc PUBLIC include)
+target_include_directories(unixprimwrap PUBLIC include)
 
-target_link_libraries(linuxproc PRIVATE unixprimwrap)
-
-target_compile_options(linuxproc PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
+target_compile_options(unixprimwrap PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)

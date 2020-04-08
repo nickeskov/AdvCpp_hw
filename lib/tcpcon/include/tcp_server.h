@@ -25,7 +25,7 @@ class Server {
 
     [[nodiscard]] const std::string &get_src_addr() const noexcept;
 
-    [[nodiscard]] uint32_t get_src_port() const noexcept;
+    [[nodiscard]] uint16_t get_src_port() const noexcept;
 
     Connection accept();
 
@@ -36,10 +36,10 @@ class Server {
     ~Server() noexcept = default;
 
   private:
-    linuxproc::Descriptor server_sock_fd_;
+    unixprimwrap::Descriptor server_sock_fd_;
 
     std::string src_addr;
-    uint32_t src_port{};
+    uint16_t src_port{};
 };
 
 }

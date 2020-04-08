@@ -32,7 +32,9 @@ Server::Server(std::string_view ip, uint16_t port)
     if (::bind(server_sock_fd_.data(), reinterpret_cast<sockaddr *>(&addr),
                sizeof(addr)) < 0) {
         std::string msg = "cannot bind to addr=";
-        msg.append(ip) += ", port=" + std::to_string(port);
+        msg += ip;
+        msg += ", port=";
+        msg += std::to_string(port);
         throw errors::BindError(msg);
     }
 
@@ -60,7 +62,7 @@ const std::string &Server::get_src_addr() const noexcept {
     return src_addr;
 }
 
-uint32_t Server::get_src_port() const noexcept {
+uint16_t Server::get_src_port() const noexcept {
     return src_port;
 }
 
@@ -68,8 +70,11 @@ Connection Server::accept() {
     sockaddr_in client_addr{};
     socklen_t addr_size = sizeof(client_addr);
 
-    auto client_fd = linuxproc::Descriptor(
-            ::accept(server_sock_fd_.data(), reinterpret_cast<sockaddr *>(&client_addr), &addr_size));
+    unixprimwrap::Descriptor client_fd{::accept(
+            server_sock_fd_.data(),
+            reinterpret_cast<sockaddr *>(&client_addr),
+            &addr_size)
+    };
 
     if (!client_fd.is_valid()) {
         throw errors::AcceptError("cannot accept new connection, server_sock_fd="

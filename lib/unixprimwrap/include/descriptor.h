@@ -1,7 +1,7 @@
-#ifndef HW_LINUXPROC_DESCRIPTOR_H
-#define HW_LINUXPROC_DESCRIPTOR_H
+#ifndef HW_UNIXPRIMWRAP_DESCRIPTOR_H
+#define HW_UNIXPRIMWRAP_DESCRIPTOR_H
 
-namespace linuxproc {
+namespace unixprimwrap {
 
 class Descriptor {
   public:
@@ -26,6 +26,8 @@ class Descriptor {
     explicit operator int() const noexcept;
 
     [[nodiscard]] bool is_valid() const noexcept;
+
+    [[nodiscard]] int extract() noexcept;
 
     int close() noexcept;
 

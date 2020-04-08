@@ -1,9 +1,9 @@
 #include "descriptor.h"
-#include "linuxproc_errors.h"
+#include "unixprimwrap_errors.h"
 
 #include <unistd.h>
 
-namespace linuxproc {
+namespace unixprimwrap {
 
 Descriptor::Descriptor(int &fd) noexcept: fd_(fd) {
     fd = -1;
@@ -59,6 +59,12 @@ Descriptor::operator int() const noexcept {
 
 Descriptor::~Descriptor() noexcept {
     close();
+}
+
+int Descriptor::extract() noexcept {
+    int fd = fd_;
+    fd_ = -1;
+    return fd;
 }
 
 int Descriptor::close() noexcept {

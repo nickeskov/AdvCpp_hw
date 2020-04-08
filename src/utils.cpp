@@ -1,8 +1,8 @@
 #include "utils.h"
 #include "process.h"
 #include "trivilog.h"
-#include "tcp_server.h"
 #include "tcp_connection.h"
+#include "tcp_server.h"
 
 #include <array>
 #include <iostream>
@@ -81,14 +81,27 @@ void hw3_test() {
 
     auto server = tcpcon::ipv4::Server("127.0.0.1", 0);
 
+    std::cout << "started server on "
+              << server.get_src_addr() << ":" << server.get_src_port() << std::endl;
+
     auto write_client1 = tcpcon::ipv4::Connection("127.0.0.1", server.get_src_port());
+    write_client1.set_write_timeout(1);
     auto write_client2 = tcpcon::ipv4::Connection("127.0.0.1", server.get_src_port());
+    write_client2.set_write_timeout(1);
 
     write_client1.write_exact(test_str, sizeof(test_str));
+    std::cout << "started write_client1=" << write_client1.to_string() << std::endl;
+
     write_client2.write_exact(test_str, sizeof(test_str));
+    std::cout << "started write_client2=" << write_client2.to_string() << std::endl;
 
     auto read_client1 = server.accept();
+    std::cout << "accepted read_client1=" << read_client1.to_string() << std::endl;
+    read_client1.set_read_timeout(1);
+
     auto read_client2 = server.accept();
+    std::cout << "accepted read_client2=" << read_client2.to_string() << std::endl;
+    read_client2.set_read_timeout(1);
 
     read_client1.read_exact(buff, sizeof(test_str));
     if (strcmp(buff, test_str) != 0) {

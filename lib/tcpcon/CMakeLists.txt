@@ -19,12 +19,12 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS} \
                     ${GCC_COVERAGE_LINK_FLAGS} \
                     -O0 -ggdb3")
-endif()
+endif ()
 
 if (CMAKE_BUILD_TYPE STREQUAL Release)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -march=native")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -march=native")
-endif()
+endif ()
 
 option(ENABLE_SANITIZE "Enable sanitizers to ${PROJECT_NAME} target(s)" OFF)
 
@@ -33,11 +33,11 @@ if (ENABLE_SANITIZE)
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_SANITIZE_FLAGS}")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCC_SANITIZE_FLAGS}")
-endif()
+endif ()
 
 option(ENABLE_CPPCHECK "Enable cppcheck checker as custom target ${PROJECT_NAME}_check" OFF)
 
-if(ENABLE_CPPCHECK)
+if (ENABLE_CPPCHECK)
     message("CPPCHECK ENABLED for ${PROJECT_NAME}")
 
     # set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -60,7 +60,7 @@ if(ENABLE_CPPCHECK)
             COMMENT "running cppcheck for ${PROJECT_NAME}"
             COMMAND cppcheck ${${PROJECT_NAME}_CPPCHECK_ARGS}
     )
-endif()
+endif ()
 
 # ------------------------------------------------------------------------------
 
@@ -71,8 +71,6 @@ add_library(tcpcon STATIC
 
 target_include_directories(tcpcon PUBLIC include)
 
-target_include_directories(tcpcon PRIVATE lib/linuxproc/include)
-
-target_link_libraries(tcpcon linuxproc)
+target_link_libraries(tcpcon PRIVATE unixprimwrap)
 
 target_compile_options(tcpcon PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)

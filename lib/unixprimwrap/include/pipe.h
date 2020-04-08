@@ -1,9 +1,9 @@
-#ifndef HW_LINUXPROC_PIPE_H
-#define HW_LINUXPROC_PIPE_H
+#ifndef HW_LINUXPRIMWRAP_PIPE_H
+#define HW_LINUXPRIMWRAP_PIPE_H
 
 #include "descriptor.h"
 
-namespace linuxproc {
+namespace unixprimwrap {
 
 class Pipe {
   public:

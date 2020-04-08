@@ -60,12 +60,13 @@ class Process {
   private:
     pid_t pid_ = -1;
     bool is_readable_ = true;
-    Descriptor fd_process_to_;
-    Descriptor fd_process_from_;
+    unixprimwrap::Descriptor fd_process_to_;
+    unixprimwrap::Descriptor fd_process_from_;
 
     Process() noexcept = default;
 
-    static void prepare_to_exec(const Pipe &pipe_to_child, const Pipe &pipe_from_child);
+    static void prepare_to_exec(const unixprimwrap::Pipe &pipe_to_child,
+                                const unixprimwrap::Pipe &pipe_from_child);
 
     void create_proc(std::string_view path, char *const argv[]);
 };
