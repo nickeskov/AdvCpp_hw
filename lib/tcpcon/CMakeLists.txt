@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(hw)
+project(tcpcon)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,19 +14,19 @@ message("Build type for ${PROJECT_NAME}: ${CMAKE_BUILD_TYPE}")
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS} \
                         ${GCC_COVERAGE_LINK_FLAGS} \
-                        -O0 -Wall -Wextra -Wpedantic -Werror -ggdb3")
+                        -O0 -ggdb3")
 
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS} \
                     ${GCC_COVERAGE_LINK_FLAGS} \
-                    -O0 -Wall -Wextra -Wpedantic -Werror -ggdb3")
+                    -O0 -ggdb3")
 endif()
-
-option(ENABLE_SANITIZE "Enable sanitizers to ${PROJECT_NAME} target(s)" OFF)
 
 if (CMAKE_BUILD_TYPE STREQUAL Release)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -march=native")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -march=native")
 endif()
+
+option(ENABLE_SANITIZE "Enable sanitizers to ${PROJECT_NAME} target(s)" OFF)
 
 if (ENABLE_SANITIZE)
     message("Sanitizers ENABLED for ${PROJECT_NAME}")
@@ -43,13 +43,12 @@ if(ENABLE_CPPCHECK)
     # set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
     list(APPEND ${PROJECT_NAME}_CPPCHECK_ARGS
-            --enable=warning,style,performance,portability,unusedFunction
+            --enable=warning,style,performance,portability
             --check-library
             --std=c++11
             --verbose
             --error-exitcode=1
             --language=c++
-            -DMAIN=main
             -I ${PROJECT_SOURCE_DIR}/include
             ${PROJECT_SOURCE_DIR}/include/*.h*
             ${PROJECT_SOURCE_DIR}/src/*.c*
@@ -65,18 +64,15 @@ endif()
 
 # ------------------------------------------------------------------------------
 
-add_subdirectory(lib/tcpcon)
-add_subdirectory(lib/linuxproc)
-add_subdirectory(lib/trivilog)
+add_library(tcpcon STATIC
+        src/tcp_connection.cpp
+        src/tcp_server.cpp
+        src/tcpcon_errors.cpp)
 
-add_executable(hw
-        src/main.cpp
-        src/utils.cpp)
+target_include_directories(tcpcon PUBLIC include)
 
-target_include_directories(hw PRIVATE include)
+target_include_directories(tcpcon PRIVATE lib/linuxproc/include)
 
-target_link_libraries(hw linuxproc)
-target_link_libraries(hw trivilog)
-target_link_libraries(hw tcpcon)
+target_link_libraries(tcpcon linuxproc)
 
-target_compile_options(hw PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
+target_compile_options(tcpcon PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
