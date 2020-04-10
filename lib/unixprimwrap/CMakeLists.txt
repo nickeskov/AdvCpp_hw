@@ -12,18 +12,22 @@ set(GCC_SANITIZE_FLAGS "-fsanitize=address")
 message("Build type for ${PROJECT_NAME}: ${CMAKE_BUILD_TYPE}")
 
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS} \
-                        ${GCC_COVERAGE_LINK_FLAGS} \
-                        -O0 -ggdb3")
-
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS} \
-                    ${GCC_COVERAGE_LINK_FLAGS} \
-                    -O0 -ggdb3")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g3")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g3")
 endif ()
 
 if (CMAKE_BUILD_TYPE STREQUAL Release)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -march=native")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -march=native")
+endif ()
+
+option(ENABLE_COVERAGE "Enable code coverage compiler options to ${PROJECT_NAME} target(s)" OFF)
+
+if (ENABLE_COVERAGE)
+    message("Code coverage ENABLED for ${PROJECT_NAME}")
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}")
 endif ()
 
 option(ENABLE_SANITIZE "Enable sanitizers to ${PROJECT_NAME} target(s)" OFF)
