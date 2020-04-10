@@ -1,0 +1,21 @@
+language: cpp
+dist: bionic
+compiler:
+  - clang
+  - gcc
+
+addons:
+  apt:
+    packages:
+      - cmake
+      - valgrind
+      - cppcheck
+
+script:
+  - gcc --version
+  - /bin/bash scripts/run_static_checks.sh lib/
+  - /bin/bash scripts/run_build.sh
+  - /bin/bash scripts/run.sh
+  - /bin/bash scripts/run_memcheck.sh
+
+
