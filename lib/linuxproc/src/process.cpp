@@ -1,9 +1,9 @@
 #include "process.h"
 #include "linuxproc_errors.h"
+#include "pipe.h"
 
-#include <sstream>
 #include <algorithm>
-#include <pipe.h>
+
 
 namespace linuxproc {
 
@@ -91,8 +91,9 @@ Process::~Process() noexcept {
     }
 }
 
-void Process::prepare_to_exec(const Pipe &pipe_to_child, const Pipe &pipe_from_child) {
-    auto stdin_dup = Descriptor(dup(STDIN_FILENO));
+void Process::prepare_to_exec(const unixprimwrap::Pipe &pipe_to_child,
+                              const unixprimwrap::Pipe &pipe_from_child) {
+    auto stdin_dup = unixprimwrap::Descriptor(dup(STDIN_FILENO));
     if (stdin_dup.data() == -1) {
         throw errors::DupError("cannot dup STDIN_FILENO");
     }
@@ -111,8 +112,8 @@ void Process::prepare_to_exec(const Pipe &pipe_to_child, const Pipe &pipe_from_c
 }
 
 void Process::create_proc(std::string_view path, char *const argv[]) {
-    Pipe pipe_to_child;
-    Pipe pipe_from_child;
+    unixprimwrap::Pipe pipe_to_child;
+    unixprimwrap::Pipe pipe_from_child;
 
     pid_ = fork();
     if (pid_ == -1) {

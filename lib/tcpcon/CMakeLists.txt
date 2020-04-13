@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(trivilog)
+project(tcpcon)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -68,14 +68,13 @@ endif ()
 
 # ------------------------------------------------------------------------------
 
-add_library(trivilog STATIC
-        src/base_logger.cpp
-        src/file_logger.cpp
-        src/global_logger.cpp
-        src/stderr_buff_logger.cpp
-        src/stderr_logger.cpp
-        src/stdout_logger.cpp)
+add_library(tcpcon STATIC
+        src/tcp_connection.cpp
+        src/tcp_server.cpp
+        src/tcpcon_errors.cpp)
 
-target_include_directories(trivilog PUBLIC include)
+target_include_directories(tcpcon PUBLIC include)
 
-target_compile_options(trivilog PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
+target_link_libraries(tcpcon PRIVATE unixprimwrap)
+
+target_compile_options(tcpcon PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)

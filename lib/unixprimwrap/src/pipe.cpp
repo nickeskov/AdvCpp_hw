@@ -1,12 +1,16 @@
 #include "pipe.h"
-#include "linuxproc_errors.h"
+#include "unixprimwrap_errors.h"
 
 #include <unistd.h>
 
-namespace linuxproc {
+namespace unixprimwrap {
+
+namespace {
 
 constexpr int PIPE_WRITE_END = 1;
 constexpr int PIPE_READ_END = 0;
+
+}
 
 Pipe::Pipe() {
     int pipe_fd[2];
