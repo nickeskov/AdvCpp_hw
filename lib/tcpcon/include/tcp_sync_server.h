@@ -6,9 +6,9 @@
 #include <cinttypes>
 
 #include "descriptor.h"
-#include "tcp_connection.h"
+#include "tcp_sync_connection.h"
 
-namespace tcpcon::ipv4 {
+namespace tcpcon::ipv4::sync {
 
 class Server {
   public:

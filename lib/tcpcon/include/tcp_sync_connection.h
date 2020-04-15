@@ -7,7 +7,7 @@
 
 #include "descriptor.h"
 
-namespace tcpcon::ipv4 {
+namespace tcpcon::ipv4::sync {
 
 class Connection {
   public:

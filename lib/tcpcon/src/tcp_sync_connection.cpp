@@ -1,4 +1,4 @@
-#include "tcp_connection.h"
+#include "tcp_sync_connection.h"
 #include "tcpcon_errors.h"
 
 #include <sys/socket.h>
@@ -8,7 +8,7 @@
 #include <utility>
 #include <string>
 
-namespace tcpcon::ipv4 {
+namespace tcpcon::ipv4::sync {
 
 Connection::Connection(std::string_view ip, uint16_t port)
         : sock_fd_(socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) {

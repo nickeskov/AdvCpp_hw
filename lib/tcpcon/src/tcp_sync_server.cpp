@@ -1,4 +1,4 @@
-#include "tcp_server.h"
+#include "tcp_sync_server.h"
 #include "tcpcon_errors.h"
 
 #include <sys/socket.h>
@@ -6,7 +6,7 @@
 #include <arpa/inet.h>
 #include <utility>
 
-namespace tcpcon::ipv4 {
+namespace tcpcon::ipv4::sync {
 
 Server::Server(std::string_view ip, uint16_t port)
         : server_sock_fd_(socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) {
