@@ -1,4 +1,4 @@
-#include "global_logger.h"
+#include "trivilog/global_logger.h"
 
 namespace trivilog::global {
 

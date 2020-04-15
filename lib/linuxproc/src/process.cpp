@@ -1,6 +1,6 @@
-#include "process.h"
-#include "linuxproc_errors.h"
-#include "pipe.h"
+#include "linuxproc/process.h"
+#include "linuxproc/errors.h"
+#include "unixprimwrap/pipe.h"
 
 #include <algorithm>
 

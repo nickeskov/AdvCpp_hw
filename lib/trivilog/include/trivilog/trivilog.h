@@ -1,11 +1,11 @@
-#ifndef HW_TRIVILOG_TRIVILOG_H
-#define HW_TRIVILOG_TRIVILOG_H
+#ifndef TRIVILOG_TRIVILOG_TRIVILOG_H
+#define TRIVILOG_TRIVILOG_TRIVILOG_H
 
 #include "log_level.h"
 
 #include "base_logger.h"
 
-#include "trivilog_errors.h"
+#include "errors.h"
 #include "stdout_logger.h"
 #include "stderr_logger.h"
 #include "stderr_buff_logger.h"
@@ -25,4 +25,4 @@ std::unique_ptr<T> create_logger(Args&&... args) {
 
 }
 
-#endif //HW_TRIVILOG_TRIVILOG_H
+#endif //TRIVILOG_TRIVILOG_TRIVILOG_H

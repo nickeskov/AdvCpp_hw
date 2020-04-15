@@ -1,5 +1,5 @@
-#ifndef HW_TRIVILOG_STDOUT_LOGGER_H
-#define HW_TRIVILOG_STDOUT_LOGGER_H
+#ifndef TRIVILOG_TRIVILOG_STDOUT_LOGGER_H
+#define TRIVILOG_TRIVILOG_STDOUT_LOGGER_H
 
 #include "base_logger.h"
 
@@ -14,4 +14,4 @@ class StdoutLogger : public BaseLogger {
 
 }
 
-#endif //HW_TRIVILOG_STDOUT_LOGGER_H
+#endif //TRIVILOG_TRIVILOG_STDOUT_LOGGER_H

@@ -1,11 +1,11 @@
-#ifndef HW_TCPCON_TCP_CONNECTION_H
-#define HW_TCPCON_TCP_CONNECTION_H
+#ifndef TCPCON_TCPCON_SYNC_CONNECTION_H
+#define TCPCON_TCPCON_SYNC_CONNECTION_H
 
 #include <string_view>
 #include <string>
 #include <cinttypes>
 
-#include "descriptor.h"
+#include "unixprimwrap/descriptor.h"
 
 namespace tcpcon::ipv4::sync {
 
@@ -74,4 +74,4 @@ class Connection {
 
 }
 
-#endif //HW_TCPCON_TCP_CONNECTION_H
+#endif //TCPCON_TCPCON_SYNC_CONNECTION_H

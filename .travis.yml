@@ -17,5 +17,3 @@ script:
   - /bin/bash scripts/run_build.sh
   - /bin/bash scripts/run.sh
   - /bin/bash scripts/run_memcheck.sh
-
-

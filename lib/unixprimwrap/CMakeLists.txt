@@ -71,7 +71,7 @@ endif ()
 add_library(unixprimwrap STATIC
         src/pipe.cpp
         src/descriptor.cpp
-        src/unixprimwrap_errors.cpp)
+        src/errors.cpp)
 
 target_include_directories(unixprimwrap PUBLIC include)
 

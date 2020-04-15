@@ -1,12 +1,12 @@
-#ifndef HW_TCPCON_TCP_SERVER_H
-#define HW_TCPCON_TCP_SERVER_H
+#ifndef TCPCON_TCPCON_SYNC_SERVER_H
+#define TCPCON_TCPCON_SYNC_SERVER_H
 
 #include <string_view>
 #include <string>
 #include <cinttypes>
 
-#include "descriptor.h"
-#include "tcp_sync_connection.h"
+#include "unixprimwrap/descriptor.h"
+#include "connection.h"
 
 namespace tcpcon::ipv4::sync {
 
@@ -44,4 +44,4 @@ class Server {
 
 }
 
-#endif //HW_TCPCON_TCP_SERVER_H
+#endif //TCPCON_TCPCON_SYNC_SERVER_H

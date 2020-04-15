@@ -1,5 +1,5 @@
-#ifndef HW_LINUXPRIMWRAP_PIPE_H
-#define HW_LINUXPRIMWRAP_PIPE_H
+#ifndef UNIXPRIMWRAP_UNIXPRIMWRAP_PIPE_H
+#define UNIXPRIMWRAP_UNIXPRIMWRAP_PIPE_H
 
 #include "descriptor.h"
 
@@ -24,4 +24,4 @@ class Pipe {
 
 }
 
-#endif //HW_PIPE_H
+#endif //UNIXPRIMWRAP_UNIXPRIMWRAP_PIPE_H

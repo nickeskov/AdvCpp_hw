@@ -1,5 +1,5 @@
-#include "tcp_sync_server.h"
-#include "tcpcon_errors.h"
+#include "tcpcon/sync/server.h"
+#include "tcpcon/errors.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>

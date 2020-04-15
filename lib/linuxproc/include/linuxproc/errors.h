@@ -1,5 +1,5 @@
-#ifndef HW_LINUXPROC_LINUXPROC_ERRORS_H
-#define HW_LINUXPROC_LINUXPROC_ERRORS_H
+#ifndef LINUXPROC_LINUXPROC_ERRORS_H
+#define LINUXPROC_LINUXPROC_ERRORS_H
 
 #include <cerrno>
 #include <stdexcept>
@@ -71,4 +71,4 @@ class CloseError : public RuntimeError {
 
 }
 
-#endif //HW_LINUXPROC_LINUXPROC_ERRORS_H
+#endif //LINUXPROC_LINUXPROC_ERRORS_H

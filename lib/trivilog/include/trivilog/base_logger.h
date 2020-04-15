@@ -1,5 +1,5 @@
-#ifndef HW_TRIVILOG_BASE_LOGGER_H
-#define HW_TRIVILOG_BASE_LOGGER_H
+#ifndef TRIVILOG_TRIVILOG_BASE_LOGGER_H
+#define TRIVILOG_TRIVILOG_BASE_LOGGER_H
 
 #include <atomic>
 #include <type_traits>
@@ -44,4 +44,4 @@ class BaseLogger {
 
 }
 
-#endif //HW_TRIVILOG_BASE_LOGGER_H
+#endif //TRIVILOG_TRIVILOG_BASE_LOGGER_H

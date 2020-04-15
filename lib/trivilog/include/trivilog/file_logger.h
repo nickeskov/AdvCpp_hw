@@ -1,5 +1,5 @@
-#ifndef HW_TRIVILOG_FILE_LOGGER_H
-#define HW_TRIVILOG_FILE_LOGGER_H
+#ifndef TRIVILOG_TRIVILOG_FILE_LOGGER_H
+#define TRIVILOG_TRIVILOG_FILE_LOGGER_H
 
 #include <fstream>
 #include <string>
@@ -28,4 +28,4 @@ class FileLogger : public BaseLogger {
 };
 
 }
-#endif //HW_TRIVILOG_FILE_LOGGER_H
+#endif //TRIVILOG_TRIVILOG_FILE_LOGGER_H

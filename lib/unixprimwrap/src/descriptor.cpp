@@ -1,5 +1,5 @@
-#include "descriptor.h"
-#include "unixprimwrap_errors.h"
+#include "unixprimwrap/descriptor.h"
+#include "unixprimwrap/errors.h"
 
 #include <unistd.h>
 

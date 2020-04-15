@@ -1,5 +1,5 @@
-#include "pipe.h"
-#include "unixprimwrap_errors.h"
+#include "unixprimwrap/pipe.h"
+#include "unixprimwrap/errors.h"
 
 #include <unistd.h>
 

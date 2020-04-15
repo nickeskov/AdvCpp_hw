@@ -1,4 +1,4 @@
-#include "stderr_buff_logger.h"
+#include "trivilog/stderr_buff_logger.h"
 
 #include <iostream>
 

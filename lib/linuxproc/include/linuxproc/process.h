@@ -1,5 +1,5 @@
-#ifndef HW_LINUXPROC_PROCESS_H
-#define HW_LINUXPROC_PROCESS_H
+#ifndef LINUXPROC_LINUXPROC_PROCESS_H
+#define LINUXPROC_LINUXPROC_PROCESS_H
 
 #include <cstddef>
 #include <csignal>
@@ -11,9 +11,9 @@
 #include <wait.h>
 #include <unistd.h>
 
-#include "descriptor.h"
-#include "pipe.h"
-#include "linuxproc_errors.h"
+#include "unixprimwrap/descriptor.h"
+#include "unixprimwrap/pipe.h"
+#include "errors.h"
 
 namespace linuxproc {
 
@@ -73,4 +73,4 @@ class Process {
 
 }
 
-#endif //HW_LINUXPROC_PROCESS_H
+#endif //LINUXPROC_LINUXPROC_PROCESS_H

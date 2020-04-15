@@ -1,5 +1,5 @@
-#ifndef HW_TRIVILOG_LOG_LEVEL_H
-#define HW_TRIVILOG_LOG_LEVEL_H
+#ifndef TRIVILOG_TRIVILOG_LOG_LEVEL_H
+#define TRIVILOG_TRIVILOG_LOG_LEVEL_H
 
 namespace trivilog {
 
@@ -14,4 +14,4 @@ enum class log_level : unsigned int {
 
 }
 
-#endif //HW_TRIVILOG_LOG_LEVEL_H
+#endif //TRIVILOG_TRIVILOG_LOG_LEVEL_H

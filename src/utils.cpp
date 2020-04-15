@@ -1,8 +1,8 @@
 #include "utils.h"
-#include "process.h"
-#include "trivilog.h"
-#include "tcp_sync_connection.h"
-#include "tcp_sync_server.h"
+#include "linuxproc/process.h"
+#include "trivilog/trivilog.h"
+#include "tcpcon/sync/connection.h"
+#include "tcpcon/sync/server.h"
 
 #include <array>
 #include <iostream>

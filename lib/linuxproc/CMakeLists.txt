@@ -70,7 +70,7 @@ endif ()
 
 add_library(linuxproc STATIC
         src/process.cpp
-        src/linuxproc_errors.cpp)
+        src/errors.cpp)
 
 target_include_directories(linuxproc PUBLIC include)
 

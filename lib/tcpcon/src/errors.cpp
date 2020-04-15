@@ -1,9 +1,11 @@
-#include "tcpcon_errors.h"
+#include "tcpcon/errors.h"
+
+#include <string>
 
 namespace tcpcon::errors {
 
 RuntimeError::RuntimeError(std::string_view what_arg)
-        : std::runtime_error(what_arg.data()) {}
+        : std::runtime_error(std::string(what_arg)) {}
 
 int RuntimeError::errno_code() const noexcept {
     return errno_code_;

@@ -1,9 +1,11 @@
-#include "unixprimwrap_errors.h"
+#include "unixprimwrap/errors.h"
+
+#include <string>
 
 namespace unixprimwrap::errors {
 
 RuntimeError::RuntimeError(std::string_view what_arg)
-        : std::runtime_error(what_arg.data()) {}
+        : std::runtime_error(std::string(what_arg)) {}
 
 int RuntimeError::errno_code() const noexcept {
     return errno_code_;

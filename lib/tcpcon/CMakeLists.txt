@@ -69,9 +69,9 @@ endif ()
 # ------------------------------------------------------------------------------
 
 add_library(tcpcon STATIC
-        src/tcp_sync_connection.cpp
-        src/tcp_sync_server.cpp
-        src/tcpcon_errors.cpp)
+        src/sync/connection.cpp
+        src/sync/server.cpp
+        src/errors.cpp)
 
 target_include_directories(tcpcon PUBLIC include)
 

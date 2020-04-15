@@ -1,5 +1,5 @@
-#ifndef HW_TCPCON_TCPCON_ERRORS_H
-#define HW_TCPCON_TCPCON_ERRORS_H
+#ifndef TCPCON_TCPCON_ERRORS_H
+#define TCPCON_TCPCON_ERRORS_H
 
 #include <stdexcept>
 #include <cerrno>
@@ -92,4 +92,4 @@ class EofError : public ReadError {
 };
 
 }
-#endif //HW_TCPCON_TCPCON_ERRORS_H
+#endif //TCPCON_TCPCON_ERRORS_H

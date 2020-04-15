@@ -1,5 +1,5 @@
-#ifndef HW_TRIVILOG_ERRORS_H
-#define HW_TRIVILOG_ERRORS_H
+#ifndef TRIVILOG_TRIVILOG_ERRORS_H
+#define TRIVILOG_TRIVILOG_ERRORS_H
 
 #include <exception>
 
@@ -11,4 +11,4 @@ class InvalidLogLevelError : public BaseError {};
 
 }
 
-#endif //HW_TRIVILOG_ERRORS_H
+#endif //TRIVILOG_TRIVILOG_ERRORS_H
