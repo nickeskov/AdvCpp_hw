@@ -104,7 +104,7 @@ size_t Connection::read(void *buf, size_t len) {
             is_readable_ = false;
         }
         if (bytes_read == -1) {
-            throw errors::WriteError(
+            throw errors::ReadError(
                     "write error occurs while reading from endpoint, sock_fd="
                     + std::to_string(sock_fd_.data()));
         }
