@@ -22,8 +22,11 @@ AcceptError::AcceptError(std::string_view what_arg) : ServerError(what_arg) {}
 ConnectionError::ConnectionError(std::string_view what_arg)
         : RuntimeError(what_arg) {}
 
-SocketError::SocketError(std::string_view what_arg)
+IoServiceError::IoServiceError(std::string_view what_arg)
         : ConnectionError(what_arg) {}
+
+TimeoutSetError::TimeoutSetError(std::string_view what_arg)
+        : IoServiceError(what_arg) {}
 
 ConnOpenError::ConnOpenError(std::string_view what_arg)
         : ConnectionError(what_arg) {}

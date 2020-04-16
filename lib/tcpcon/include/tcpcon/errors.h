@@ -44,11 +44,15 @@ class ConnectionError : public RuntimeError {
     explicit ConnectionError(std::string_view what_arg);
 };
 
-class SocketError : public ConnectionError {
+class IoServiceError : public ConnectionError {
   public:
-    explicit SocketError(std::string_view what_arg);
+    explicit IoServiceError(std::string_view what_arg);
 };
 
+class TimeoutSetError : public IoServiceError {
+  public:
+    explicit TimeoutSetError(std::string_view what_arg);
+};
 
 class ConnOpenError : public ConnectionError {
   public:
@@ -59,7 +63,6 @@ class ConnCloseError : public ConnectionError {
   public:
     explicit ConnCloseError(std::string_view what_arg);
 };
-
 
 class InvalidAddressError : public ConnOpenError {
   public:

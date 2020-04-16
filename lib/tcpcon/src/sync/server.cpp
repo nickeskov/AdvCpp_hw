@@ -12,12 +12,12 @@ Server::Server(std::string_view ip, uint16_t port)
         : server_sock_fd_(socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) {
 
     if (!server_sock_fd_.is_valid()) {
-        throw errors::SocketError("cannot create IPV4 socket");
+        throw errors::IoServiceError("cannot create IPV4 socket");
     }
 
     int yes = 1;
     if (setsockopt(server_sock_fd_.data(), SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0) {
-        throw errors::SocketError("cannot set SO_REUSEADDR to IPV4 socket");
+        throw errors::IoServiceError("cannot set SO_REUSEADDR to IPV4 socket");
     }
 
     sockaddr_in addr{};
@@ -47,7 +47,7 @@ Server::Server(std::string_view ip, uint16_t port)
     if (port == 0) {
         socklen_t addr_size = sizeof(addr);
         if (getsockname(server_sock_fd_.data(), reinterpret_cast<sockaddr *>(&addr), &addr_size) < 0) {
-            throw errors::SocketError(
+            throw errors::IoServiceError(
                     "cannot get info about self, server_sock_fd="
                     + std::to_string(server_sock_fd_.data()));
         }

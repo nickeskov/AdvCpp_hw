@@ -14,7 +14,7 @@ Connection::Connection(std::string_view ip, uint16_t port)
         : sock_fd_(socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) {
 
     if (!sock_fd_.is_valid()) {
-        throw errors::SocketError("cannot create IPV4 socket");
+        throw errors::IoServiceError("cannot create IPV4 socket");
     }
 
     sockaddr_in addr{};
@@ -22,13 +22,14 @@ Connection::Connection(std::string_view ip, uint16_t port)
     addr.sin_port = htons(port);
     if (inet_pton(addr.sin_family, ip.data(), &addr.sin_addr) == 0) {
         std::string msg = "invalid ip address, ip=";
-        msg.append(ip);
+        msg += ip;
         throw errors::InvalidAddressError(msg);
     }
 
     if (::connect(sock_fd_.data(), reinterpret_cast<sockaddr *>(&addr), sizeof(addr)) < 0) {
         std::string msg = "cannot connect to, addr=";
-        msg.append(ip) += ", port=" + std::to_string(port);
+        msg += ip;
+        msg += ", port=" + std::to_string(port);
         throw errors::ConnOpenError(msg);
     }
 
@@ -127,7 +128,7 @@ void Connection::connect(std::string_view ip, uint16_t port) {
 void Connection::set_read_timeout(int seconds) {
     timeval timeout{seconds, 0};
     if (setsockopt(sock_fd_.data(), SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
-        throw errors::ConnectionError(
+        throw errors::TimeoutSetError(
                 "cannot set read timeout, sock_fd="
                 + std::to_string(sock_fd_.data()) + ", seconds=" + std::to_string(seconds));
     }
@@ -136,7 +137,7 @@ void Connection::set_read_timeout(int seconds) {
 void Connection::set_write_timeout(int seconds) {
     timeval timeout{seconds, 0};
     if (setsockopt(sock_fd_.data(), SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
-        throw errors::ConnectionError(
+        throw errors::TimeoutSetError(
                 "cannot set write timeout, sock_fd="
                 + std::to_string(sock_fd_.data()) + ", seconds=" + std::to_string(seconds));
     }
@@ -180,7 +181,7 @@ void Connection::set_src_endpoint() {
     sockaddr_in addr{};
     socklen_t addr_size = sizeof(addr);
     if (getsockname(sock_fd_.data(), reinterpret_cast<sockaddr *>(&addr), &addr_size) < 0) {
-        throw errors::SocketError(
+        throw errors::IoServiceError(
                 "cannot get info about self endpoint, sock_fd="
                 + std::to_string(sock_fd_.data()));
     }
