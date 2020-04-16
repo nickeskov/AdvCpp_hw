@@ -38,6 +38,33 @@ Connection::Connection(std::string_view ip, uint16_t port)
     set_src_endpoint();
 }
 
+const std::string &Connection::get_dst_addr() const noexcept {
+    return dst_addr_;
+}
+
+const std::string &Connection::get_src_addr() const noexcept {
+    return src_addr_;
+}
+
+uint16_t Connection::get_dst_port() const noexcept {
+    return dst_port_;
+}
+
+uint16_t Connection::get_src_port() const noexcept {
+    return src_port_;
+}
+
+const unixprimwrap::Descriptor &Connection::get_io_service() const noexcept {
+    return sock_fd_;
+}
+
+std::string Connection::to_string() const {
+    return R"({"dst_addr"=")" + get_dst_addr()
+           + R"(","dst_port"=)" + std::to_string(get_dst_port())
+           + R"(,"src_addr"=")" + get_src_addr()
+           + R"(","src_port"=)" + std::to_string(get_src_port()) + "}";
+}
+
 size_t Connection::write(const void *buf, size_t len) {
     if (!is_opened()) {
         throw errors::ClosedEndpointError("write to closed endpoint, sock_fd="
@@ -163,29 +190,6 @@ void Connection::set_src_endpoint() {
 
     src_addr_ = buff;
     src_port_ = ntohs(addr.sin_port);
-}
-
-const std::string &Connection::get_dst_addr() const noexcept {
-    return dst_addr_;
-}
-
-const std::string &Connection::get_src_addr() const noexcept {
-    return src_addr_;
-}
-
-uint16_t Connection::get_dst_port() const noexcept {
-    return dst_port_;
-}
-
-uint16_t Connection::get_src_port() const noexcept {
-    return src_port_;
-}
-
-std::string Connection::to_string() const {
-    return R"({"dst_addr"=")" + get_dst_addr()
-           + R"(","dst_port"=)" + std::to_string(get_dst_port())
-           + R"(,"src_addr"=")" + get_src_addr()
-           + R"(","src_port"=)" + std::to_string(get_src_port()) + "}";
 }
 
 }

@@ -30,6 +30,8 @@ class Connection {
 
     [[nodiscard]] uint16_t get_src_port() const noexcept;
 
+    [[nodiscard]] const unixprimwrap::Descriptor &get_io_service() const noexcept;
+
     [[nodiscard]] std::string to_string() const;
 
     size_t write(const void *buf, size_t len);
