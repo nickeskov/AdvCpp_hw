@@ -8,7 +8,7 @@
 #include "unixprimwrap/descriptor.h"
 #include "connection.h"
 
-namespace tcpcon::ipv4::sync {
+namespace tcpcon::sync::ipv4 {
 
 class Server {
   public:

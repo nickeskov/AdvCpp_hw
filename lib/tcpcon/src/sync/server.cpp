@@ -6,7 +6,7 @@
 #include <arpa/inet.h>
 #include <utility>
 
-namespace tcpcon::ipv4::sync {
+namespace tcpcon::sync::ipv4 {
 
 Server::Server(std::string_view ip, uint16_t port)
         : server_sock_fd_(socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) {

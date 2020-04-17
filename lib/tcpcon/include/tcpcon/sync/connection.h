@@ -7,7 +7,7 @@
 
 #include "unixprimwrap/descriptor.h"
 
-namespace tcpcon::ipv4::sync {
+namespace tcpcon::sync::ipv4 {
 
 class Connection {
   public:

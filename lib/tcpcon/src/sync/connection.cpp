@@ -8,7 +8,7 @@
 #include <utility>
 #include <string>
 
-namespace tcpcon::ipv4::sync {
+namespace tcpcon::sync::ipv4 {
 
 Connection::Connection(std::string_view ip, uint16_t port)
         : sock_fd_(socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) {
