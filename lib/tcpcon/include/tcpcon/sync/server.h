@@ -19,9 +19,9 @@ class Server {
 
     Server &operator=(const Server &) = delete;
 
-    Server(Server &&) = default;
+    Server(Server &&) noexcept = default;
 
-    Server &operator=(Server &&) = default;
+    Server &operator=(Server &&) noexcept = default;
 
     [[nodiscard]] const std::string &get_src_addr() const noexcept;
 
