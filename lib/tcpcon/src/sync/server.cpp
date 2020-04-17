@@ -97,7 +97,7 @@ bool Server::is_opened() const noexcept {
 void Server::close() {
     if (is_opened()) {
         if (server_sock_fd_.close() < 0) {
-            throw errors::ConnCloseError(
+            throw errors::ServerCloseError(
                     "error while closing server socket, server_sock_fd="
                     + std::to_string(server_sock_fd_.data()));
         }

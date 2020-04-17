@@ -39,6 +39,11 @@ class AcceptError : public ServerError {
     explicit AcceptError(std::string_view what_arg);
 };
 
+class ServerCloseError : public ServerError {
+  public:
+    explicit ServerCloseError(std::string_view what_arg);
+};
+
 class ConnectionError : public RuntimeError {
   public:
     explicit ConnectionError(std::string_view what_arg);

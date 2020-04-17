@@ -19,6 +19,8 @@ ListenError::ListenError(std::string_view what_arg) : ServerError(what_arg) {}
 
 AcceptError::AcceptError(std::string_view what_arg) : ServerError(what_arg) {}
 
+ServerCloseError::ServerCloseError(std::string_view what) : ServerError(what) {}
+
 ConnectionError::ConnectionError(std::string_view what_arg)
         : RuntimeError(what_arg) {}
 
