@@ -2,6 +2,7 @@
 #include "unixprimwrap/errors.h"
 
 #include <unistd.h>
+#include <utility>
 
 namespace unixprimwrap {
 

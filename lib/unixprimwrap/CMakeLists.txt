@@ -70,7 +70,8 @@ endif ()
 add_library(unixprimwrap STATIC
         src/pipe.cpp
         src/descriptor.cpp
-        src/errors.cpp)
+        src/errors.cpp
+        src/fork.cpp)
 
 target_include_directories(unixprimwrap PUBLIC include)
 
