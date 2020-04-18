@@ -3,16 +3,10 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <utility>
-#include <csignal>
 
 namespace unixprimwrap {
 
-Fork::Fork() noexcept {
-    pid_ = fork();
-    if (pid_ == 0) {
-        is_child_ = true;
-    }
-}
+Fork::Fork() noexcept: pid_(fork()), is_child_(pid_ == 0) {}
 
 Fork::Fork(Fork &&other) noexcept {
     swap(other);
