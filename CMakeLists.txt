@@ -80,5 +80,6 @@ target_link_libraries(hw linuxproc)
 target_link_libraries(hw unixprimwrap)
 target_link_libraries(hw trivilog)
 target_link_libraries(hw tcpcon)
+target_link_libraries(hw pthread)
 
 target_compile_options(hw PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)

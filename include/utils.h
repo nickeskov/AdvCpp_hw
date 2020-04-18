@@ -7,4 +7,6 @@ void hw2_test();
 
 void hw3_test();
 
+void hw4_test();
+
 #endif //HW_UTILS_H
