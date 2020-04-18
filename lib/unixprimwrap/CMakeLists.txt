@@ -54,15 +54,14 @@ if (ENABLE_CPPCHECK)
             --error-exitcode=1
             --language=c++
             -I ${PROJECT_SOURCE_DIR}/include
-            ${PROJECT_SOURCE_DIR}/include/*.h*
-            ${PROJECT_SOURCE_DIR}/src/*.c*
-            ${PROJECT_SOURCE_DIR}/test/*.c*
+            -I{} # for xargs utility
             )
 
     add_custom_target(
             ${PROJECT_NAME}_check
             COMMENT "running cppcheck for ${PROJECT_NAME}"
-            COMMAND cppcheck ${${PROJECT_NAME}_CPPCHECK_ARGS}
+            COMMAND find ${PROJECT_SOURCE_DIR}/src -name *?.cpp
+            | xargs cppcheck ${${PROJECT_NAME}_CPPCHECK_ARGS}
     )
 endif ()
 
