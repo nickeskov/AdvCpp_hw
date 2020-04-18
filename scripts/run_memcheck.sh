@@ -4,4 +4,5 @@ mkdir -p "build" && cd "build" || exit 1
 cmake .. -DCMAKE_BUILD_TYPE=Debug
 cmake --build .
 
-valgrind --tool=memcheck --leak-check=full --leak-resolution=high --track-origins=yes ./hw
+valgrind -v --tool=memcheck --leak-check=full --show-leak-kinds=all \
+  --leak-resolution=high --track-origins=yes ./hw
