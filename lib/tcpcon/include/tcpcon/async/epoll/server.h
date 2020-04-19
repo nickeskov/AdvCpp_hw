@@ -13,6 +13,7 @@
 namespace tcpcon::async::ipv4 {
 
 using connection_handler_t = std::function<void(Connection & , uint32_t)>;
+using const_connection_handler_t = std::function<void(const Connection & , uint32_t)>;
 
 class Server {
   public:
@@ -32,7 +33,7 @@ class Server {
 
     void set_after_accept_handler(const connection_handler_t &handler);
 
-    void set_before_close_handler(const connection_handler_t &handler);
+    void set_before_close_handler(const const_connection_handler_t &handler);
 
     bool add_to_event_loop(Connection &&connection, uint32_t events);
 
@@ -80,7 +81,7 @@ class Server {
 
     connection_handler_t after_accept_handler_;
 
-    connection_handler_t before_close_handler_;
+    const_connection_handler_t before_close_handler_;
 
     void accept_connections(uint32_t epoll_accept_flags, uint32_t accept_type, int max_count);
 };

@@ -163,15 +163,15 @@ void hw4_test() {
                     }
                 }
             } catch (std::exception &e) {
-                std::cerr << "hw4: error in server thread, error=" << e.what()
-                          << ", errno=" << strerror(errno);
+                std::cerr << "hw4: error in server process, error=" << e.what()
+                          << ", errno=" << strerror(errno) << std::endl;
             }
         };
         auto after_accept_handler = [](tcpcon::async::ipv4::Connection &conn, uint32_t events) {
             std::cout << "accepted connection=" << conn.to_string()
                       << ", server accept events=" << events << std::endl;
         };
-        auto before_close_handler = [](tcpcon::async::ipv4::Connection &conn, uint32_t events) {
+        auto before_close_handler = [](const tcpcon::async::ipv4::Connection &conn, uint32_t events) {
             std::cout << "closing connection=" << conn.to_string()
                       << ", closed by events=" << events << std::endl;
         };

@@ -265,7 +265,7 @@ void Server::set_after_accept_handler(const connection_handler_t &handler) {
     after_accept_handler_ = handler;
 }
 
-void Server::set_before_close_handler(const connection_handler_t &handler) {
+void Server::set_before_close_handler(const const_connection_handler_t &handler) {
     before_close_handler_ = handler;
 }
 
