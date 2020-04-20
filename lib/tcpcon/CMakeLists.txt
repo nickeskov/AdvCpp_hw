@@ -47,6 +47,7 @@ if (ENABLE_CPPCHECK)
     # set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
     list(APPEND ${PROJECT_NAME}_CPPCHECK_ARGS
+            --inline-suppr # only for this library
             --enable=warning,style,performance,portability
             --check-library
             --std=c++11
@@ -70,7 +71,10 @@ endif ()
 add_library(tcpcon STATIC
         src/sync/connection.cpp
         src/sync/server.cpp
-        src/errors.cpp)
+        src/errors.cpp
+        src/async/epoll/server.cpp
+        src/async/connection.cpp
+        src/async/utils.cpp)
 
 target_include_directories(tcpcon PUBLIC include)
 

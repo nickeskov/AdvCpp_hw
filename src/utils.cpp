@@ -3,12 +3,16 @@
 #include "trivilog/trivilog.h"
 #include "tcpcon/sync/connection.h"
 #include "tcpcon/sync/server.h"
+#include "tcpcon/async/connection.h"
+#include "tcpcon/async/epoll/server.h"
+#include "unixprimwrap/fork.h"
 
 #include <array>
 #include <iostream>
 #include <stdexcept>
 #include <cstring>
 #include <cerrno>
+#include <ctime>
 
 void hw1_test() {
     std::array<char, 100> buf{};
@@ -129,4 +133,100 @@ void hw3_test() {
     read_client2.close();
 
     server.close();
+}
+
+void hw4_test() {
+    std::cout << "---------hw4 test---------" << std::endl;
+
+    char test_str[] = "1234567890";
+    const int max_msg_len = sizeof(test_str);
+
+    auto server = tcpcon::async::ipv4::Server("127.0.0.1", 0);
+    std::cout << "started server on "
+              << server.get_src_addr() << ":" << server.get_src_port() << std::endl;
+
+    // forks here
+    unixprimwrap::Fork server_fork;
+
+    if (!server_fork.is_valid()) {
+        throw std::runtime_error("hw4: fork failed");
+    }
+    if (server_fork.is_child()) {
+        const int max_len_per_call = 256;
+        auto connection_handler = [&](tcpcon::async::ipv4::Connection &conn, uint32_t events) {
+            try {
+                if (events & EPOLLIN) {
+                    if (conn.read_in_io_buff(max_len_per_call) == 0) {
+                        server.close_connection(conn, events);
+                    } else {
+                        conn.write_from_io_buff(max_len_per_call);
+                    }
+                }
+            } catch (std::exception &e) {
+                std::cerr << "hw4: error in server process, error=" << e.what()
+                          << ", errno=" << strerror(errno) << std::endl;
+            }
+        };
+        auto after_accept_handler = [](tcpcon::async::ipv4::Connection &conn, uint32_t events) {
+            std::cout << "accepted connection=" << conn.to_string()
+                      << ", server accept events=" << events << std::endl;
+        };
+        auto before_close_handler = [](const tcpcon::async::ipv4::Connection &conn, uint32_t events) {
+            std::cout << "closing connection=" << conn.to_string()
+                      << ", closed by events=" << events << std::endl;
+        };
+        try {
+            server.set_after_accept_handler(after_accept_handler);
+            server.set_before_close_handler(before_close_handler);
+
+            auto cfg = tcpcon::async::ipv4::Server::EventLoopConfig();
+            server.event_loop(connection_handler, cfg);
+        } catch (std::exception &e) {
+            std::cerr << "hw4: error in server, error=" << e.what()
+                      << ", errno=" << strerror(errno);
+        }
+        return;
+    }
+    uint16_t server_port = server.get_src_port();
+    server.close(0);
+
+    auto client1 = tcpcon::async::ipv4::Connection("127.0.0.1", server_port);
+    std::cout << "started write_client1=" << client1.to_string() << std::endl;
+    client1.set_write_timeout(1);
+    client1.set_read_timeout(1);
+
+    auto client2 = tcpcon::async::ipv4::Connection("127.0.0.1", server_port);
+    std::cout << "started write_client2=" << client1.to_string() << std::endl;
+    client2.set_write_timeout(1);
+    client2.set_read_timeout(1);
+
+    client1.get_io_buffer() += test_str;
+    client2.get_io_buffer() += test_str;
+
+    client1.write_from_io_buff(max_msg_len);
+    client2.write_from_io_buff(max_msg_len);
+
+    struct timespec timespec{};
+    timespec.tv_nsec = 10000000; // 10 millisecond
+
+    while (client1.read_in_io_buff(max_msg_len) < 0) {
+        nanosleep(&timespec, nullptr);
+    }
+
+    while (client2.read_in_io_buff(max_msg_len) < 0) {
+        nanosleep(&timespec, nullptr);
+    }
+
+    if (client1.get_io_buffer() != test_str) {
+        throw std::runtime_error("hw4 test failed");
+    }
+
+    if (client2.get_io_buffer() != test_str) {
+        throw std::runtime_error("hw4 test failed");
+    }
+
+    client1.close();
+    client2.close();
+
+    nanosleep(&timespec, nullptr);
 }

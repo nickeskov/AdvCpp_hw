@@ -21,6 +21,27 @@ AcceptError::AcceptError(std::string_view what_arg) : ServerError(what_arg) {}
 
 ServerCloseError::ServerCloseError(std::string_view what) : ServerError(what) {}
 
+EventLoopError::EventLoopError(std::string_view what_arg)
+        : ServerError(what_arg) {}
+
+BadHandlerError::BadHandlerError(std::string_view what_arg) : EventLoopError(what_arg) {}
+
+EpollError::EpollError(std::string_view what_arg) : EventLoopError(what_arg) {}
+
+EpollCreateError::EpollCreateError(std::string_view what_arg)
+        : EpollError(what_arg) {}
+
+EpollWaitError::EpollWaitError(std::string_view what_arg) : EpollError(what_arg) {}
+
+EpollCtlError::EpollCtlError(std::string_view what_arg)
+        : EpollError(what_arg) {}
+
+EpollAddError::EpollAddError(std::string_view what_arg) : EpollCtlError(what_arg) {}
+
+EpollModError::EpollModError(std::string_view what_arg) : EpollCtlError(what_arg) {}
+
+EpollDelError::EpollDelError(std::string_view what_arg) : EpollCtlError(what_arg) {}
+
 ConnectionError::ConnectionError(std::string_view what_arg)
         : RuntimeError(what_arg) {}
 

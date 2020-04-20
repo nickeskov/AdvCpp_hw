@@ -44,6 +44,51 @@ class ServerCloseError : public ServerError {
     explicit ServerCloseError(std::string_view what_arg);
 };
 
+class EventLoopError : public ServerError {
+  public:
+    explicit EventLoopError(std::string_view what_arg);
+};
+
+class BadHandlerError : public EventLoopError {
+  public:
+    explicit BadHandlerError(std::string_view what_arg);
+};
+
+class EpollError : public EventLoopError {
+  public:
+    explicit EpollError(std::string_view what_arg);
+};
+
+class EpollCreateError : public EpollError {
+  public:
+    explicit EpollCreateError(std::string_view what_arg);
+};
+
+class EpollWaitError : public EpollError {
+  public:
+    explicit EpollWaitError(std::string_view what_arg);
+};
+
+class EpollCtlError : public EpollError {
+  public:
+    explicit EpollCtlError(std::string_view what_arg);
+};
+
+class EpollAddError : public EpollCtlError {
+  public:
+    explicit EpollAddError(std::string_view what_arg);
+};
+
+class EpollModError : public EpollCtlError {
+  public:
+    explicit EpollModError(std::string_view what_arg);
+};
+
+class EpollDelError : public EpollCtlError {
+  public:
+    explicit EpollDelError(std::string_view what_arg);
+};
+
 class ConnectionError : public RuntimeError {
   public:
     explicit ConnectionError(std::string_view what_arg);
