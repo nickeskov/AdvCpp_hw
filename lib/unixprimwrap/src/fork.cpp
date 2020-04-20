@@ -16,8 +16,8 @@ Fork &Fork::operator=(Fork &&other) noexcept {
     if (this == &other) {
         return *this;
     }
-    this->kill(SIGTERM);
-    this->wait(nullptr, 0);
+    kill(SIGTERM);
+    wait(nullptr, 0);
     swap(other);
     return *this;
 }
@@ -46,6 +46,7 @@ pid_t Fork::extract() noexcept {
     return pid;
 }
 
+// NOLINTNEXTLINE kill method can't be const
 int Fork::kill(int sig) {
     int status = -1;
     if (is_valid() && !is_child()) {
