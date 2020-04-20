@@ -1,7 +1,9 @@
 #include "tcpcon/async/utils.h"
 
+extern "C" {
 #include <fcntl.h>
 #include <sys/ioctl.h>
+}
 
 namespace tcpcon::async::utils {
 

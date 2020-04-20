@@ -2,12 +2,15 @@
 #include "tcpcon/async/utils.h"
 #include "tcpcon/errors.h"
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <string>
 #include <vector>
 #include <utility>
+
+extern "C" {
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+}
 
 namespace {
 

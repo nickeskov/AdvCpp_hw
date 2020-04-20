@@ -2,12 +2,15 @@
 #include "tcpcon/errors.h"
 #include "tcpcon/async/utils.h"
 
+#include <string>
+
+extern "C" {
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <string>
+}
 
 namespace tcpcon::async::ipv4 {
 

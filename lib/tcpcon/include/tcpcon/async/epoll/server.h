@@ -5,7 +5,10 @@
 #include <atomic>
 #include <functional>
 #include <csignal>
+
+extern "C" {
 #include <sys/epoll.h>
+}
 
 #include "tcpcon/async/connection.h"
 #include "unixprimwrap/descriptor.h"
@@ -13,7 +16,7 @@
 namespace tcpcon::async::ipv4 {
 
 using connection_handler_t = std::function<void(Connection & , uint32_t)>;
-using const_connection_handler_t = std::function<void(const Connection & , uint32_t)>;
+using const_connection_handler_t = std::function<void(const Connection &, uint32_t)>;
 
 class Server {
   public:
