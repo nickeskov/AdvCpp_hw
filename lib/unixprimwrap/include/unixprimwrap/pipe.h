@@ -1,7 +1,7 @@
 #ifndef UNIXPRIMWRAP_UNIXPRIMWRAP_PIPE_H
 #define UNIXPRIMWRAP_UNIXPRIMWRAP_PIPE_H
 
-#include "descriptor.h"
+#include "unixprimwrap/descriptor.h"
 
 namespace unixprimwrap {
 

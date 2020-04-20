@@ -1,7 +1,9 @@
 #ifndef UNIXPRIMWRAP_UNIXPRIMWRAP_FORK_H
 #define UNIXPRIMWRAP_UNIXPRIMWRAP_FORK_H
 
+extern "C" {
 #include <sys/types.h>
+}
 
 namespace unixprimwrap {
 

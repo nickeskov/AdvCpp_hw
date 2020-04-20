@@ -1,7 +1,9 @@
 #include "unixprimwrap/pipe.h"
 #include "unixprimwrap/errors.h"
 
+extern "C" {
 #include <unistd.h>
+}
 
 namespace unixprimwrap {
 

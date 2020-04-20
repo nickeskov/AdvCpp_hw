@@ -8,12 +8,14 @@
 #include <algorithm>
 #include <utility>
 
+extern "C" {
 #include <wait.h>
 #include <unistd.h>
+}
 
 #include "unixprimwrap/descriptor.h"
 #include "unixprimwrap/pipe.h"
-#include "errors.h"
+#include "unixprimwrap/errors.h"
 
 namespace linuxproc {
 

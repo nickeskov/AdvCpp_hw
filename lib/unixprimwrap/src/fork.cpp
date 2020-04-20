@@ -1,8 +1,11 @@
 #include "unixprimwrap/fork.h"
 
+#include <utility>
+
+extern "C" {
 #include <sys/wait.h>
 #include <unistd.h>
-#include <utility>
+}
 
 namespace unixprimwrap {
 

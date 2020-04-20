@@ -5,7 +5,7 @@
 #include <string>
 #include <ios>
 
-#include "base_logger.h"
+#include "trivilog/base_logger.h"
 
 namespace trivilog {
 

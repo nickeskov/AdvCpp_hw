@@ -1,11 +1,12 @@
 #ifndef TRIVILOG_TRIVILOG_GLOBAL_LOGGER_H
 #define TRIVILOG_TRIVILOG_GLOBAL_LOGGER_H
 
-#include "base_logger.h"
-#include "stdout_logger.h"
 #include <memory>
 #include <mutex>
 #include <type_traits>
+
+#include "trivilog/base_logger.h"
+#include "trivilog/stdout_logger.h"
 
 namespace trivilog::global {
 

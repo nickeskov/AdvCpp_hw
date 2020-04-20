@@ -1,12 +1,15 @@
 #include "tcpcon/sync/connection.h"
 #include "tcpcon/errors.h"
 
+#include <utility>
+#include <string>
+
+extern "C" {
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <utility>
-#include <string>
+}
 
 namespace tcpcon::sync::ipv4 {
 

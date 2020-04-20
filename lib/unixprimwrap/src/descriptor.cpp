@@ -1,8 +1,11 @@
 #include "unixprimwrap/descriptor.h"
 #include "unixprimwrap/errors.h"
 
-#include <unistd.h>
 #include <utility>
+
+extern "C" {
+#include <unistd.h>
+}
 
 namespace unixprimwrap {
 

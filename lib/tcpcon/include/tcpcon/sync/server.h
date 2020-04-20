@@ -6,7 +6,7 @@
 #include <cinttypes>
 
 #include "unixprimwrap/descriptor.h"
-#include "connection.h"
+#include "tcpcon/sync/connection.h"
 
 namespace tcpcon::sync::ipv4 {
 

@@ -4,7 +4,6 @@
 
 #include <algorithm>
 
-
 namespace linuxproc {
 
 Process::Process(std::string_view path, char *const argv[]) {

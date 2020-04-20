@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <string_view>
 
-#include "log_level.h"
+#include "trivilog/log_level.h"
 
 namespace trivilog {
 
