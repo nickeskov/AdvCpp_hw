@@ -1,11 +1,23 @@
 #include "utils.h"
+#include "unixprimwrap/fork.h"
+
+#ifdef HW_ENABLE_HW1
 #include "linuxproc/process.h"
+#endif
+
+#ifdef HW_ENABLE_HW2
 #include "trivilog/trivilog.h"
+#endif
+
+#ifdef HW_ENABLE_HW3
 #include "tcpcon/sync/connection.h"
 #include "tcpcon/sync/server.h"
+#endif
+
+#ifdef HW_ENABLE_HW4
 #include "tcpcon/async/connection.h"
 #include "tcpcon/async/epoll/server.h"
-#include "unixprimwrap/fork.h"
+#endif
 
 #include <array>
 #include <iostream>
@@ -16,6 +28,9 @@
 #include <thread>
 
 void hw1_test() {
+#ifdef HW_ENABLE_HW1
+
+    std::cout << "---------hw1 test---------" << std::endl;
     std::array<char, 100> buf{};
 
     auto proc = linuxproc::Process("/bin/cat", "/bin/cat");
@@ -52,9 +67,15 @@ void hw1_test() {
 
     buf[br] = '\0';
     std::cout << buf.data();
+
+#endif
 }
 
 void hw2_test() {
+#ifdef HW_ENABLE_HW2
+
+    std::cout << "---------hw2 test---------" << std::endl;
+
     auto log = trivilog::StdoutLogger();
 
     log.info("KEK");
@@ -78,9 +99,15 @@ void hw2_test() {
     trivilog::global::Logger::set_global_logger(std::move(logptr));
 
     trivilog::global::Logger::warn("THIS IS DISPLAYED BY NEW GLOBAL LOGGER");
+
+#endif
 }
 
 void hw3_test() {
+#ifdef HW_ENABLE_HW3
+
+    std::cout << "---------hw3 test---------" << std::endl;
+
     char test_str[] = "1234567890";
     char buff[sizeof(test_str)]{};
 
@@ -134,9 +161,13 @@ void hw3_test() {
     read_client2.close();
 
     server.close();
+
+#endif
 }
 
 void hw4_test() {
+#ifdef HW_ENABLE_HW4
+
     std::cout << "---------hw4 test---------" << std::endl;
 
     char test_str[] = "1234567890";
@@ -229,4 +260,6 @@ void hw4_test() {
     client2.close();
 
     std::this_thread::sleep_for(sleep_duration);
+
+#endif
 }

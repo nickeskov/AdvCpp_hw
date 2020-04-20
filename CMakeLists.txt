@@ -65,20 +65,44 @@ endif ()
 
 # ------------------------------------------------------------------------------
 
-add_subdirectory(lib/tcpcon)
-add_subdirectory(lib/linuxproc)
-add_subdirectory(lib/unixprimwrap)
-add_subdirectory(lib/trivilog)
+option(HW_ENABLE_HW1 "Enable hw1 tests and build all additional hw1 libraries for ${PROJECT_NAME}" OFF)
+option(HW_ENABLE_HW2 "Enable hw2 tests and build all additional hw2 libraries for ${PROJECT_NAME}" OFF)
+option(HW_ENABLE_HW3 "Enable hw3 tests and build all additional hw3 libraries for ${PROJECT_NAME}" OFF)
+option(HW_ENABLE_HW4 "Enable hw4 tests and build all additional hw4 libraries for ${PROJECT_NAME}" OFF)
+option(HW_ENABLE_ALL "Enable all hw tests and build all libraries for ${PROJECT_NAME}" OFF)
 
 add_executable(hw
         src/main.cpp
         src/utils.cpp)
 
+target_compile_options(hw PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
+
 target_include_directories(hw PRIVATE include)
 
-target_link_libraries(hw linuxproc)
+add_subdirectory(lib/unixprimwrap)
 target_link_libraries(hw unixprimwrap)
-target_link_libraries(hw trivilog)
-target_link_libraries(hw tcpcon)
 
-target_compile_options(hw PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
+if (HW_ENABLE_ALL OR HW_ENABLE_HW1)
+    add_subdirectory(lib/linuxproc)
+    target_link_libraries(hw linuxproc)
+    target_compile_definitions(hw PRIVATE HW_ENABLE_HW1)
+endif ()
+
+if (HW_ENABLE_ALL OR HW_ENABLE_HW2)
+    add_subdirectory(lib/trivilog)
+    target_link_libraries(hw trivilog)
+    target_compile_definitions(hw PRIVATE HW_ENABLE_HW2)
+endif ()
+
+if (HW_ENABLE_ALL OR HW_ENABLE_HW3 OR HW_ENABLE_HW4)
+    add_subdirectory(lib/tcpcon)
+    target_link_libraries(hw tcpcon)
+
+    if (HW_ENABLE_ALL OR HW_ENABLE_HW3)
+        target_compile_definitions(hw PRIVATE HW_ENABLE_HW3)
+    endif ()
+
+    if (HW_ENABLE_ALL OR HW_ENABLE_HW4)
+        target_compile_definitions(hw PRIVATE HW_ENABLE_HW4)
+    endif ()
+endif ()
