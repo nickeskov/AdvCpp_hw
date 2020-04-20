@@ -12,7 +12,8 @@
 #include <stdexcept>
 #include <cstring>
 #include <cerrno>
-#include <ctime>
+#include <chrono>
+#include <thread>
 
 void hw1_test() {
     std::array<char, 100> buf{};
@@ -206,15 +207,14 @@ void hw4_test() {
     client1.write_from_io_buff(max_msg_len);
     client2.write_from_io_buff(max_msg_len);
 
-    struct timespec timespec{};
-    timespec.tv_nsec = 10000000; // 10 millisecond
+    auto sleep_duration = std::chrono::milliseconds(10); // 10 millisecond
 
     while (client1.read_in_io_buff(max_msg_len) < 0) {
-        nanosleep(&timespec, nullptr);
+        std::this_thread::sleep_for(sleep_duration);
     }
 
     while (client2.read_in_io_buff(max_msg_len) < 0) {
-        nanosleep(&timespec, nullptr);
+        std::this_thread::sleep_for(sleep_duration);
     }
 
     if (client1.get_io_buffer() != test_str) {
@@ -228,5 +228,5 @@ void hw4_test() {
     client1.close();
     client2.close();
 
-    nanosleep(&timespec, nullptr);
+    std::this_thread::sleep_for(sleep_duration);
 }

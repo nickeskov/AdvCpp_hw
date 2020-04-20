@@ -71,8 +71,8 @@ class Server {
     unixprimwrap::Descriptor server_sock_fd_;
     unixprimwrap::Descriptor epoll_fd_;
 
-    std::string src_addr;
-    uint16_t src_port{};
+    std::string src_addr_;
+    uint16_t src_port_{};
 
     struct ConnectionWithEvent {
         Connection connection;
