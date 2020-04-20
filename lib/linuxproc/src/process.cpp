@@ -4,6 +4,11 @@
 
 #include <algorithm>
 
+extern "C" {
+#include <wait.h>
+#include <unistd.h>
+}
+
 namespace linuxproc {
 
 Process::Process(std::string_view path, char *const argv[]) {

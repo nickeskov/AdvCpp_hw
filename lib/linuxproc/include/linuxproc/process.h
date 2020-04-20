@@ -8,11 +8,6 @@
 #include <algorithm>
 #include <utility>
 
-extern "C" {
-#include <wait.h>
-#include <unistd.h>
-}
-
 #include "unixprimwrap/descriptor.h"
 #include "unixprimwrap/pipe.h"
 #include "unixprimwrap/errors.h"
