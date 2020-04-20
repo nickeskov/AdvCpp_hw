@@ -19,21 +19,30 @@ Server::Server(std::string_view ip, uint16_t port)
     }
 
     int yes = 1;
-    if (setsockopt(server_sock_fd_.data(), SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0) {
+    int set_reuseaddr_opt_status = setsockopt(server_sock_fd_.data(),
+                                              SOL_SOCKET,
+                                              SO_REUSEADDR,
+                                              &yes, sizeof(yes));
+
+    if (set_reuseaddr_opt_status < 0) {
         throw errors::IoServiceError("cannot set SO_REUSEADDR to IPV4 socket");
     }
 
     sockaddr_in addr{};
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
+
     if (inet_pton(addr.sin_family, ip.data(), &addr.sin_addr) == 0) {
         std::string msg = "invalid ip address, ip=";
         msg.append(ip);
         throw errors::InvalidAddressError(msg);
     }
 
-    if (::bind(server_sock_fd_.data(), reinterpret_cast<sockaddr *>(&addr),
-               sizeof(addr)) < 0) {
+    int bind_status = ::bind(server_sock_fd_.data(),
+                             reinterpret_cast<sockaddr *>(&addr),
+                             sizeof(addr));
+
+    if (bind_status < 0) {
         std::string msg = "cannot bind to addr=";
         msg += ip;
         msg += ", port=";
@@ -49,7 +58,11 @@ Server::Server(std::string_view ip, uint16_t port)
 
     if (port == 0) {
         socklen_t addr_size = sizeof(addr);
-        if (getsockname(server_sock_fd_.data(), reinterpret_cast<sockaddr *>(&addr), &addr_size) < 0) {
+
+        int getsockname_status = getsockname(server_sock_fd_.data(),
+                                             reinterpret_cast<sockaddr *>(&addr),
+                                             &addr_size);
+        if (getsockname_status < 0) {
             throw errors::IoServiceError(
                     "cannot get info about self, server_sock_fd="
                     + std::to_string(server_sock_fd_.data()));
