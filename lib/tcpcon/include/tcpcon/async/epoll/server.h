@@ -44,12 +44,19 @@ class Server {
 
     bool change_event(const Connection &connection, uint32_t epoll_events);
 
+    // This is event loop configuration structure, for epoll and other staff
     struct EventLoopConfig {
+        // cppcheck-suppress unusedStructMember
         int epoll_max_events = 4096;
+        // cppcheck-suppress unusedStructMember
         uint32_t epoll_server_flags = EPOLLIN;
+        // cppcheck-suppress unusedStructMember
         uint32_t epoll_accept_flags = EPOLLIN;
+        // cppcheck-suppress unusedStructMember
         int epoll_timeout = -1;
+        // cppcheck-suppress unusedStructMember
         sigset_t *epoll_sigmask = nullptr;
+        // cppcheck-suppress unusedStructMember
         int max_accept_clients_per_loop = -1;
     };
 
@@ -74,8 +81,11 @@ class Server {
     std::string src_addr_;
     uint16_t src_port_{};
 
+    // This is a helper structure to store connection and event in connections map
     struct ConnectionWithEvent {
+        // cppcheck-suppress unusedStructMember
         Connection connection;
+        // cppcheck-suppress unusedStructMember
         uint32_t events;
     };
     std::map<int, ConnectionWithEvent> clients_;

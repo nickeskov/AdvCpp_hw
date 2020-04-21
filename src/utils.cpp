@@ -2,21 +2,32 @@
 #include "unixprimwrap/fork.h"
 
 #ifdef HW_ENABLE_HW1
+
 #include "linuxproc/process.h"
+
 #endif
 
 #ifdef HW_ENABLE_HW2
+
 #include "trivilog/trivilog.h"
+
 #endif
 
 #ifdef HW_ENABLE_HW3
+
 #include "tcpcon/sync/connection.h"
 #include "tcpcon/sync/server.h"
+
 #endif
 
 #ifdef HW_ENABLE_HW4
+
 #include "tcpcon/async/connection.h"
 #include "tcpcon/async/epoll/server.h"
+
+extern "C" {
+#include <sys/epoll.h>
+}
 #endif
 
 #include <array>
@@ -212,6 +223,14 @@ void hw4_test() {
             server.set_before_close_handler(before_close_handler);
 
             auto cfg = tcpcon::async::ipv4::Server::EventLoopConfig();
+
+            cfg.max_accept_clients_per_loop = 3;
+            cfg.epoll_accept_flags = EPOLLIN;
+            cfg.epoll_server_flags = EPOLLIN;
+            cfg.epoll_sigmask = nullptr;
+            cfg.epoll_max_events = 16;
+            cfg.epoll_timeout = -1;
+
             server.event_loop(connection_handler, cfg);
         } catch (std::exception &e) {
             std::cerr << "hw4: error in server, error=" << e.what()
