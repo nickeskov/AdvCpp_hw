@@ -133,13 +133,13 @@ void Connection::set_read_timeout(int seconds) {
     timeval timeout{};
     timeout.tv_sec = seconds;
 
-    int set_read_timeout_status = setsockopt(sock_fd_.data(),
-                                             SOL_SOCKET,
-                                             SO_RCVTIMEO,
-                                             &timeout,
-                                             sizeof(timeout));
+    int status = setsockopt(sock_fd_.data(),
+                            SOL_SOCKET,
+                            SO_RCVTIMEO,
+                            &timeout,
+                            sizeof(timeout));
 
-    if (set_read_timeout_status < 0) {
+    if (status < 0) {
         throw errors::TimeoutSetError(
                 "cannot set read timeout, sock_fd="
                 + std::to_string(sock_fd_.data()) + ", seconds=" + std::to_string(seconds));
@@ -150,13 +150,13 @@ void Connection::set_write_timeout(int seconds) {
     timeval timeout{};
     timeout.tv_sec = seconds;
 
-    int set_write_timeout_status = setsockopt(sock_fd_.data(),
-                                              SOL_SOCKET,
-                                              SO_SNDTIMEO,
-                                              &timeout,
-                                              sizeof(timeout));
+    int status = setsockopt(sock_fd_.data(),
+                            SOL_SOCKET,
+                            SO_SNDTIMEO,
+                            &timeout,
+                            sizeof(timeout));
 
-    if (set_write_timeout_status < 0) {
+    if (status < 0) {
         throw errors::TimeoutSetError(
                 "cannot set write timeout, sock_fd="
                 + std::to_string(sock_fd_.data()) + ", seconds=" + std::to_string(seconds));
@@ -203,11 +203,11 @@ void Connection::set_src_endpoint() {
     sockaddr_in addr{};
     socklen_t addr_size = sizeof(addr);
 
-    int getsockname_status = getsockname(sock_fd_.data(),
-                                         reinterpret_cast<sockaddr *>(&addr),
-                                         &addr_size);
+    int status = getsockname(sock_fd_.data(),
+                             reinterpret_cast<sockaddr *>(&addr),
+                             &addr_size);
 
-    if (getsockname_status < 0) {
+    if (status < 0) {
         throw errors::IoServiceError(
                 "cannot get info about self endpoint, sock_fd="
                 + std::to_string(sock_fd_.data()));

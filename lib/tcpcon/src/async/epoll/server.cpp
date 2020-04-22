@@ -45,11 +45,11 @@ Server::Server(std::string_view ip, uint16_t port)
     }
 
     int yes = 1;
-    int set_reuseaddr_opt_status = setsockopt(server_sock_fd_.data(),
-                                              SOL_SOCKET,
-                                              SO_REUSEADDR,
-                                              &yes, sizeof(yes));
-    if (set_reuseaddr_opt_status < 0) {
+    int reuseaddr_status = setsockopt(server_sock_fd_.data(),
+                                      SOL_SOCKET,
+                                      SO_REUSEADDR,
+                                      &yes, sizeof(yes));
+    if (reuseaddr_status < 0) {
         throw errors::IoServiceError("cannot set SO_REUSEADDR to IPV4 socket");
     }
 
@@ -82,10 +82,10 @@ Server::Server(std::string_view ip, uint16_t port)
 
     if (port == 0) {
         socklen_t addr_size = sizeof(addr);
-        int getsockname_status = getsockname(server_sock_fd_.data(),
-                                             reinterpret_cast<sockaddr *>(&addr),
-                                             &addr_size);
-        if (getsockname_status < 0) {
+        int status = getsockname(server_sock_fd_.data(),
+                                 reinterpret_cast<sockaddr *>(&addr),
+                                 &addr_size);
+        if (status < 0) {
             throw errors::IoServiceError(
                     "cannot get info about self, server_sock_fd="
                     + std::to_string(server_sock_fd_.data()));
@@ -214,10 +214,10 @@ void Server::event_loop(const connection_handler_t &handler, const EventLoopConf
     }
 
     // add server socket to epoll
-    int server_sock_add_status = ::epoll_add(epoll_fd_.data(),
-                                             server_sock_fd_.data(),
-                                             cfg.epoll_server_flags | EPOLLIN);
-    if (server_sock_add_status < 0) {
+    int srv_status = ::epoll_add(epoll_fd_.data(),
+                                 server_sock_fd_.data(),
+                                 cfg.epoll_server_flags | EPOLLIN);
+    if (srv_status < 0) {
         std::string msg = "cannot add to epoll server socket, server_sock_fd=";
         msg += std::to_string(server_sock_fd_.data());
         msg += ", event=";
@@ -228,7 +228,9 @@ void Server::event_loop(const connection_handler_t &handler, const EventLoopConf
 
     // add prepared connections to epoll
     for (const auto &[conn_io_service, conn_with_event] : clients_) {
-        if (epoll_add(epoll_fd_.data(), conn_io_service, conn_with_event.events) < 0) {
+        int cli_status = epoll_add(epoll_fd_.data(), conn_io_service, conn_with_event.events);
+
+        if (cli_status < 0) {
             std::string msg = "cannot add to epoll connection with sock_fd=";
             msg += std::to_string(conn_with_event.connection.get_io_service().data());
             msg += ", event=";
@@ -248,8 +250,9 @@ void Server::event_loop(const connection_handler_t &handler, const EventLoopConf
                                             cfg.epoll_sigmask);
         if (loop_events_count < 0) {
             if (errno != EINTR) {
-                throw errors::EpollWaitError("error epoll_wait_error, server_sock_fd="
-                                             + std::to_string(server_sock_fd_.data()));
+                throw errors::EpollWaitError(
+                        "error epoll_wait_error, server_sock_fd="
+                        + std::to_string(server_sock_fd_.data()));
             }
             continue;
         }
@@ -313,17 +316,21 @@ void Server::accept_connections(uint32_t epoll_accept_flags, uint32_t accept_typ
         if (!client_fd.is_valid()) {
             if (errno == EINTR) {
                 continue;
-            } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                return;
             } else {
-                throw errors::AcceptError("cannot accept new connection, server_sock_fd="
-                                          + std::to_string(server_sock_fd_.data()));
+                bool would_block = errno == EAGAIN || errno == EWOULDBLOCK;
+                if (would_block) {
+                    return;
+                } else {
+                    throw errors::AcceptError(
+                            "cannot accept new connection, server_sock_fd="
+                            + std::to_string(server_sock_fd_.data()));
+                }
             }
         }
-
         if (utils::set_nonblock(client_fd.data(), true) < 0) {
-            throw errors::AcceptError("cannot cannot set nonblock for new connection, server_sock_fd="
-                                      + std::to_string(server_sock_fd_.data()));
+            throw errors::AcceptError(
+                    "cannot cannot set nonblock for new connection, server_sock_fd="
+                    + std::to_string(server_sock_fd_.data()));
         }
 
         inet_ntop(AF_INET, &client_addr.sin_addr, buff, INET_ADDRSTRLEN);

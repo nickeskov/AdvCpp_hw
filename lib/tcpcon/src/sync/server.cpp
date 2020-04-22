@@ -19,12 +19,12 @@ Server::Server(std::string_view ip, uint16_t port)
     }
 
     int yes = 1;
-    int set_reuseaddr_opt_status = setsockopt(server_sock_fd_.data(),
-                                              SOL_SOCKET,
-                                              SO_REUSEADDR,
-                                              &yes, sizeof(yes));
+    int reuseaddr_status = setsockopt(server_sock_fd_.data(),
+                                      SOL_SOCKET,
+                                      SO_REUSEADDR,
+                                      &yes, sizeof(yes));
 
-    if (set_reuseaddr_opt_status < 0) {
+    if (reuseaddr_status < 0) {
         throw errors::IoServiceError("cannot set SO_REUSEADDR to IPV4 socket");
     }
 
@@ -59,10 +59,10 @@ Server::Server(std::string_view ip, uint16_t port)
     if (port == 0) {
         socklen_t addr_size = sizeof(addr);
 
-        int getsockname_status = getsockname(server_sock_fd_.data(),
-                                             reinterpret_cast<sockaddr *>(&addr),
-                                             &addr_size);
-        if (getsockname_status < 0) {
+        int status = getsockname(server_sock_fd_.data(),
+                                 reinterpret_cast<sockaddr *>(&addr),
+                                 &addr_size);
+        if (status < 0) {
             throw errors::IoServiceError(
                     "cannot get info about self, server_sock_fd="
                     + std::to_string(server_sock_fd_.data()));

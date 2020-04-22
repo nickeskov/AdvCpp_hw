@@ -24,6 +24,7 @@ Connection::Connection(std::string_view ip, uint16_t port, bool set_nonblock) {
     sock_fd_ = unixprimwrap::Descriptor{
             socket(PF_INET, sock_type, IPPROTO_TCP)
     };
+
     if (!sock_fd_.is_valid()) {
         throw errors::IoServiceError("cannot create IPV4 socket");
     }
@@ -37,11 +38,11 @@ Connection::Connection(std::string_view ip, uint16_t port, bool set_nonblock) {
         throw errors::InvalidAddressError(msg);
     }
 
-    int connect_status = ::connect(sock_fd_.data(),
-                                   reinterpret_cast<sockaddr *>(&addr),
-                                   sizeof(addr));
+    int status = ::connect(sock_fd_.data(),
+                           reinterpret_cast<sockaddr *>(&addr),
+                           sizeof(addr));
 
-    if (connect_status < 0 && errno != EINPROGRESS) {
+    if (status < 0 && errno != EINPROGRESS) {
         std::string msg = "cannot connect to, addr=";
         msg.append(ip) += ", port=" + std::to_string(port);
         throw errors::ConnOpenError(msg);
@@ -100,13 +101,13 @@ void Connection::set_read_timeout(int seconds) {
     timeval timeout{};
     timeout.tv_sec = seconds;
 
-    int set_read_timeout_status = setsockopt(sock_fd_.data(),
-                                             SOL_SOCKET,
-                                             SO_RCVTIMEO,
-                                             &timeout,
-                                             sizeof(timeout));
+    int status = setsockopt(sock_fd_.data(),
+                            SOL_SOCKET,
+                            SO_RCVTIMEO,
+                            &timeout,
+                            sizeof(timeout));
 
-    if (set_read_timeout_status < 0) {
+    if (status < 0) {
         throw errors::TimeoutSetError(
                 "cannot set read timeout, sock_fd="
                 + std::to_string(sock_fd_.data()) + ", seconds=" + std::to_string(seconds));
@@ -117,13 +118,13 @@ void Connection::set_write_timeout(int seconds) {
     timeval timeout{};
     timeout.tv_sec = seconds;
 
-    int set_write_timeout_status = setsockopt(sock_fd_.data(),
-                                              SOL_SOCKET,
-                                              SO_SNDTIMEO,
-                                              &timeout,
-                                              sizeof(timeout));
+    int status = setsockopt(sock_fd_.data(),
+                            SOL_SOCKET,
+                            SO_SNDTIMEO,
+                            &timeout,
+                            sizeof(timeout));
 
-    if (set_write_timeout_status < 0) {
+    if (status < 0) {
         throw errors::TimeoutSetError(
                 "cannot set write timeout, sock_fd="
                 + std::to_string(sock_fd_.data()) + ", seconds=" + std::to_string(seconds));
@@ -165,10 +166,10 @@ void Connection::set_src_endpoint() {
     sockaddr_in addr{};
     socklen_t addr_size = sizeof(addr);
 
-    int getsockname_status = getsockname(sock_fd_.data(),
-                                         reinterpret_cast<sockaddr *>(&addr),
-                                         &addr_size);
-    if (getsockname_status < 0) {
+    int status = getsockname(sock_fd_.data(),
+                             reinterpret_cast<sockaddr *>(&addr),
+                             &addr_size);
+    if (status < 0) {
         throw errors::IoServiceError(
                 "cannot get info about self endpoint, sock_fd="
                 + std::to_string(sock_fd_.data()));
