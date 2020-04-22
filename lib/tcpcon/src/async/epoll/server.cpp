@@ -14,8 +14,6 @@ extern "C" {
 
 namespace {
 
-using namespace tcpcon::errors;
-
 int epoll_act(int epoll_fd, int act, int fd, uint32_t events) {
     struct epoll_event epoll_event{};
     epoll_event.events = events;
@@ -47,21 +45,28 @@ Server::Server(std::string_view ip, uint16_t port)
     }
 
     int yes = 1;
-    if (setsockopt(server_sock_fd_.data(), SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0) {
+    int reuseaddr_status = setsockopt(server_sock_fd_.data(),
+                                      SOL_SOCKET,
+                                      SO_REUSEADDR,
+                                      &yes, sizeof(yes));
+    if (reuseaddr_status < 0) {
         throw errors::IoServiceError("cannot set SO_REUSEADDR to IPV4 socket");
     }
 
     sockaddr_in addr{};
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
+
     if (inet_pton(addr.sin_family, ip.data(), &addr.sin_addr) == 0) {
         std::string msg = "invalid ip address, ip=";
         msg.append(ip);
         throw errors::InvalidAddressError(msg);
     }
 
-    if (::bind(server_sock_fd_.data(), reinterpret_cast<sockaddr *>(&addr),
-               sizeof(addr)) < 0) {
+    int bind_status = ::bind(server_sock_fd_.data(),
+                             reinterpret_cast<sockaddr *>(&addr),
+                             sizeof(addr));
+    if (bind_status < 0) {
         std::string msg = "cannot bind to addr=";
         msg += ip;
         msg += ", port=";
@@ -77,7 +82,10 @@ Server::Server(std::string_view ip, uint16_t port)
 
     if (port == 0) {
         socklen_t addr_size = sizeof(addr);
-        if (getsockname(server_sock_fd_.data(), reinterpret_cast<sockaddr *>(&addr), &addr_size) < 0) {
+        int status = getsockname(server_sock_fd_.data(),
+                                 reinterpret_cast<sockaddr *>(&addr),
+                                 &addr_size);
+        if (status < 0) {
             throw errors::IoServiceError(
                     "cannot get info about self, server_sock_fd="
                     + std::to_string(server_sock_fd_.data()));
@@ -85,14 +93,14 @@ Server::Server(std::string_view ip, uint16_t port)
         port = ntohs(addr.sin_port);
     }
 
-    src_addr = ip;
-    src_port = port;
+    src_addr_ = ip;
+    src_port_ = port;
 }
 
 Server::Server(Server &&other) noexcept {
     server_sock_fd_ = std::move(other.server_sock_fd_);
-    src_addr = std::move(other.src_addr);
-    src_port = other.src_port;
+    src_addr_ = std::move(other.src_addr_);
+    src_port_ = other.src_port_;
     clients_ = std::move(other.clients_);
     is_stoped_.exchange(other.is_stoped_);
 }
@@ -103,19 +111,21 @@ Server &Server::operator=(Server &&other) noexcept {
     }
 
     server_sock_fd_ = std::move(other.server_sock_fd_);
-    src_addr = std::move(other.src_addr);
-    src_port = other.src_port;
+    src_addr_ = std::move(other.src_addr_);
+    src_port_ = other.src_port_;
     clients_ = std::move(other.clients_);
     is_stoped_.exchange(other.is_stoped_);
+
+    other.src_port_ = 0;
     return *this;
 }
 
 const std::string &Server::get_src_addr() const noexcept {
-    return src_addr;
+    return src_addr_;
 }
 
 uint16_t Server::get_src_port() const noexcept {
-    return src_port;
+    return src_port_;
 }
 
 bool Server::is_opened() const noexcept {
@@ -195,14 +205,19 @@ void Server::event_loop(const connection_handler_t &handler, const EventLoopConf
         throw errors::BadHandlerError("event_loop bad handler, server_sock_fd="
                                       + std::to_string(server_sock_fd_.data()));
     }
+
     is_stoped_ = false;
+
     epoll_fd_ = unixprimwrap::Descriptor{epoll_create(1)};
     if (!epoll_fd_.is_valid()) {
         throw errors::EpollCreateError("cannot create epoll entity");
     }
+
     // add server socket to epoll
-    if (::epoll_add(epoll_fd_.data(), server_sock_fd_.data(),
-                    cfg.epoll_server_flags | EPOLLIN) < 0) {
+    int srv_status = ::epoll_add(epoll_fd_.data(),
+                                 server_sock_fd_.data(),
+                                 cfg.epoll_server_flags | EPOLLIN);
+    if (srv_status < 0) {
         std::string msg = "cannot add to epoll server socket, server_sock_fd=";
         msg += std::to_string(server_sock_fd_.data());
         msg += ", event=";
@@ -213,7 +228,9 @@ void Server::event_loop(const connection_handler_t &handler, const EventLoopConf
 
     // add prepared connections to epoll
     for (const auto &[conn_io_service, conn_with_event] : clients_) {
-        if (epoll_add(epoll_fd_.data(), conn_io_service, conn_with_event.events) < 0) {
+        int cli_status = epoll_add(epoll_fd_.data(), conn_io_service, conn_with_event.events);
+
+        if (cli_status < 0) {
             std::string msg = "cannot add to epoll connection with sock_fd=";
             msg += std::to_string(conn_with_event.connection.get_io_service().data());
             msg += ", event=";
@@ -226,7 +243,6 @@ void Server::event_loop(const connection_handler_t &handler, const EventLoopConf
     // start event loop
     std::vector<struct epoll_event> fd_events(cfg.epoll_max_events);
     while (!is_stoped_) {
-        fd_events.resize(cfg.epoll_max_events);
         int loop_events_count = epoll_pwait(epoll_fd_.data(),
                                             fd_events.data(),
                                             cfg.epoll_max_events,
@@ -234,21 +250,24 @@ void Server::event_loop(const connection_handler_t &handler, const EventLoopConf
                                             cfg.epoll_sigmask);
         if (loop_events_count < 0) {
             if (errno != EINTR) {
-                throw errors::EpollWaitError("error epoll_wait_error, server_sock_fd="
-                                             + std::to_string(server_sock_fd_.data()));
+                throw errors::EpollWaitError(
+                        "error epoll_wait_error, server_sock_fd="
+                        + std::to_string(server_sock_fd_.data()));
             }
             continue;
         }
 
-        fd_events.resize(loop_events_count);
-        for (size_t i = 0; i < fd_events.size() && !is_stoped_; ++i) {
+        for (int i = 0; i < loop_events_count && !is_stoped_; ++i) {
             struct epoll_event &received_fd = fd_events[i];
+
             if (received_fd.data.fd == server_sock_fd_.data()) {
-                accept_connections(cfg.epoll_accept_flags, received_fd.events, -1);
+                accept_connections(cfg.epoll_accept_flags,
+                                   received_fd.events,
+                                   cfg.max_accept_clients_per_loop);
             } else {
                 Connection &client = clients_.at(received_fd.data.fd).connection;
-                if ((unsigned int) received_fd.events & EPOLLHUP
-                    || (unsigned int) received_fd.events & EPOLLERR) {
+                if (received_fd.events & EPOLLHUP
+                    || received_fd.events & EPOLLERR) {
                     close_connection(client, received_fd.events);
                 } else {
                     try {
@@ -297,17 +316,21 @@ void Server::accept_connections(uint32_t epoll_accept_flags, uint32_t accept_typ
         if (!client_fd.is_valid()) {
             if (errno == EINTR) {
                 continue;
-            } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                return;
             } else {
-                throw errors::AcceptError("cannot accept new connection, server_sock_fd="
-                                          + std::to_string(server_sock_fd_.data()));
+                bool would_block = errno == EAGAIN || errno == EWOULDBLOCK;
+                if (would_block) {
+                    return;
+                } else {
+                    throw errors::AcceptError(
+                            "cannot accept new connection, server_sock_fd="
+                            + std::to_string(server_sock_fd_.data()));
+                }
             }
         }
-
         if (utils::set_nonblock(client_fd.data(), true) < 0) {
-            throw errors::AcceptError("cannot cannot set nonblock for new connection, server_sock_fd="
-                                      + std::to_string(server_sock_fd_.data()));
+            throw errors::AcceptError(
+                    "cannot cannot set nonblock for new connection, server_sock_fd="
+                    + std::to_string(server_sock_fd_.data()));
         }
 
         inet_ntop(AF_INET, &client_addr.sin_addr, buff, INET_ADDRSTRLEN);

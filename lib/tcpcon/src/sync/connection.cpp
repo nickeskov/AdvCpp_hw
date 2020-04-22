@@ -118,7 +118,8 @@ size_t Connection::read(void *buf, size_t len) {
 void Connection::read_exact(void *buf, size_t len) {
     while (len != 0) {
         if (!is_readable()) {
-            throw errors::EofError("EOF reached, sock_fd=" + std::to_string(sock_fd_.data()));
+            throw errors::EofError("EOF reached, sock_fd="
+                                   + std::to_string(sock_fd_.data()));
         }
         len -= read(buf, len);
     }
@@ -129,8 +130,16 @@ void Connection::connect(std::string_view ip, uint16_t port) {
 }
 
 void Connection::set_read_timeout(int seconds) {
-    timeval timeout{seconds, 0};
-    if (setsockopt(sock_fd_.data(), SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
+    timeval timeout{};
+    timeout.tv_sec = seconds;
+
+    int status = setsockopt(sock_fd_.data(),
+                            SOL_SOCKET,
+                            SO_RCVTIMEO,
+                            &timeout,
+                            sizeof(timeout));
+
+    if (status < 0) {
         throw errors::TimeoutSetError(
                 "cannot set read timeout, sock_fd="
                 + std::to_string(sock_fd_.data()) + ", seconds=" + std::to_string(seconds));
@@ -138,8 +147,16 @@ void Connection::set_read_timeout(int seconds) {
 }
 
 void Connection::set_write_timeout(int seconds) {
-    timeval timeout{seconds, 0};
-    if (setsockopt(sock_fd_.data(), SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
+    timeval timeout{};
+    timeout.tv_sec = seconds;
+
+    int status = setsockopt(sock_fd_.data(),
+                            SOL_SOCKET,
+                            SO_SNDTIMEO,
+                            &timeout,
+                            sizeof(timeout));
+
+    if (status < 0) {
         throw errors::TimeoutSetError(
                 "cannot set write timeout, sock_fd="
                 + std::to_string(sock_fd_.data()) + ", seconds=" + std::to_string(seconds));
@@ -158,9 +175,11 @@ void Connection::close() {
     if (is_opened()) {
         int sock_fd = sock_fd_.data();
         int status = ::shutdown(sock_fd, SHUT_RDWR);
+
         if (sock_fd_.close() < 0) {
             status = -1;
         }
+
         if (status < 0) {
             throw errors::ConnCloseError(
                     "error while closing socket, sock_fd=" + std::to_string(sock_fd));
@@ -183,7 +202,12 @@ Connection::Connection(unixprimwrap::Descriptor &&endpoint, std::string &&dst_ad
 void Connection::set_src_endpoint() {
     sockaddr_in addr{};
     socklen_t addr_size = sizeof(addr);
-    if (getsockname(sock_fd_.data(), reinterpret_cast<sockaddr *>(&addr), &addr_size) < 0) {
+
+    int status = getsockname(sock_fd_.data(),
+                             reinterpret_cast<sockaddr *>(&addr),
+                             &addr_size);
+
+    if (status < 0) {
         throw errors::IoServiceError(
                 "cannot get info about self endpoint, sock_fd="
                 + std::to_string(sock_fd_.data()));

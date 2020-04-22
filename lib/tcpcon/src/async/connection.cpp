@@ -14,10 +14,16 @@ extern "C" {
 
 namespace tcpcon::async::ipv4 {
 
-Connection::Connection(std::string_view ip, uint16_t port, bool set_nonblock)
-        : sock_fd_(socket(PF_INET,
-                          SOCK_STREAM | (set_nonblock ? (unsigned int) SOCK_NONBLOCK : 0u),
-                          IPPROTO_TCP)) {
+Connection::Connection(std::string_view ip, uint16_t port, bool set_nonblock) {
+    int sock_type = SOCK_STREAM;
+    if (set_nonblock) {
+        // NOLINTNEXTLINE is valid values and this constants is unsigned
+        sock_type |= SOCK_NONBLOCK;
+    }
+
+    sock_fd_ = unixprimwrap::Descriptor{
+            socket(PF_INET, sock_type, IPPROTO_TCP)
+    };
 
     if (!sock_fd_.is_valid()) {
         throw errors::IoServiceError("cannot create IPV4 socket");
@@ -32,8 +38,11 @@ Connection::Connection(std::string_view ip, uint16_t port, bool set_nonblock)
         throw errors::InvalidAddressError(msg);
     }
 
-    if (::connect(sock_fd_.data(), reinterpret_cast<sockaddr *>(&addr), sizeof(addr)) < 0
-        && errno != EINPROGRESS) {
+    int status = ::connect(sock_fd_.data(),
+                           reinterpret_cast<sockaddr *>(&addr),
+                           sizeof(addr));
+
+    if (status < 0 && errno != EINPROGRESS) {
         std::string msg = "cannot connect to, addr=";
         msg.append(ip) += ", port=" + std::to_string(port);
         throw errors::ConnOpenError(msg);
@@ -89,8 +98,16 @@ void Connection::connect(std::string_view ip, uint16_t port) {
 }
 
 void Connection::set_read_timeout(int seconds) {
-    timeval timeout{seconds, 0};
-    if (setsockopt(sock_fd_.data(), SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
+    timeval timeout{};
+    timeout.tv_sec = seconds;
+
+    int status = setsockopt(sock_fd_.data(),
+                            SOL_SOCKET,
+                            SO_RCVTIMEO,
+                            &timeout,
+                            sizeof(timeout));
+
+    if (status < 0) {
         throw errors::TimeoutSetError(
                 "cannot set read timeout, sock_fd="
                 + std::to_string(sock_fd_.data()) + ", seconds=" + std::to_string(seconds));
@@ -98,8 +115,16 @@ void Connection::set_read_timeout(int seconds) {
 }
 
 void Connection::set_write_timeout(int seconds) {
-    timeval timeout{seconds, 0};
-    if (setsockopt(sock_fd_.data(), SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
+    timeval timeout{};
+    timeout.tv_sec = seconds;
+
+    int status = setsockopt(sock_fd_.data(),
+                            SOL_SOCKET,
+                            SO_SNDTIMEO,
+                            &timeout,
+                            sizeof(timeout));
+
+    if (status < 0) {
         throw errors::TimeoutSetError(
                 "cannot set write timeout, sock_fd="
                 + std::to_string(sock_fd_.data()) + ", seconds=" + std::to_string(seconds));
@@ -118,9 +143,11 @@ void Connection::close() {
     if (is_opened()) {
         int sock_fd = sock_fd_.data();
         int status = ::shutdown(sock_fd, SHUT_RDWR);
+
         if (sock_fd_.close() < 0) {
             status = -1;
         }
+
         if (status < 0) {
             throw errors::ConnCloseError(
                     "error while closing socket, sock_fd=" + std::to_string(sock_fd));
@@ -138,7 +165,11 @@ Connection::~Connection() noexcept {
 void Connection::set_src_endpoint() {
     sockaddr_in addr{};
     socklen_t addr_size = sizeof(addr);
-    if (getsockname(sock_fd_.data(), reinterpret_cast<sockaddr *>(&addr), &addr_size) < 0) {
+
+    int status = getsockname(sock_fd_.data(),
+                             reinterpret_cast<sockaddr *>(&addr),
+                             &addr_size);
+    if (status < 0) {
         throw errors::IoServiceError(
                 "cannot get info about self endpoint, sock_fd="
                 + std::to_string(sock_fd_.data()));
@@ -156,9 +187,13 @@ ssize_t Connection::write(const void *buf, size_t len) {
         throw errors::ClosedEndpointError("write to closed endpoint, sock_fd="
                                           + std::to_string(sock_fd_.data()));
     }
+
     ssize_t bytes_written = ::send(sock_fd_.data(), buf, len, MSG_NOSIGNAL);
+
     if (bytes_written == -1
-        && (errno != EAGAIN || errno != EWOULDBLOCK)) {
+        && errno != EAGAIN
+        && errno != EWOULDBLOCK) {
+
         throw errors::WriteError(
                 "write error occurs while writing to endpoint, sock_fd="
                 + std::to_string(sock_fd_.data()));
@@ -173,13 +208,15 @@ ssize_t Connection::read(void *buf, size_t len) {
     }
 
     ssize_t bytes_read = 0;
-    if (is_opened() && len != 0) {
+    if (len != 0) {
         bytes_read = ::recv(sock_fd_.data(), buf, len, MSG_NOSIGNAL);
         if (bytes_read == 0) {
             is_readable_ = false;
         }
         if (bytes_read == -1
-            && (errno != EAGAIN || errno != EWOULDBLOCK)) {
+            && errno != EAGAIN
+            && errno != EWOULDBLOCK) {
+
             throw errors::ReadError(
                     "write error occurs while reading from endpoint, sock_fd="
                     + std::to_string(sock_fd_.data()));

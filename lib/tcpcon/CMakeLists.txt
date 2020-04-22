@@ -61,7 +61,8 @@ if (ENABLE_CPPCHECK)
     add_custom_target(
             ${PROJECT_NAME}_check
             COMMENT "running cppcheck for ${PROJECT_NAME}"
-            COMMAND find ${PROJECT_SOURCE_DIR}/src -name *?.cpp
+            COMMAND
+            find ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/include -name *?.cpp -or -name *?.h
             | xargs cppcheck ${${PROJECT_NAME}_CPPCHECK_ARGS}
     )
 endif ()
