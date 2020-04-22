@@ -105,10 +105,10 @@ class Map {
         return map_ptr_->extract(key);
     }
 
-    template<std::enable_if<std::is_trivially_copyable_v<T>, void> *>
-    void emplace(const value_type &value) {
-        std::lock_guard<concurrentsync::Mutex> guard(*mutex_ptr_);
-    }
+//    template<std::enable_if<std::is_trivially_copyable_v<T>, void> *>
+//    void emplace(const value_type &value) {
+//        std::lock_guard<concurrentsync::Mutex> guard(*mutex_ptr_);
+//    }
 
     ~Map() noexcept {
         if (map_ptr_ != nullptr && mutex_ptr_ != nullptr) {
@@ -123,6 +123,52 @@ class Map {
     std::map<Key, T, Compare, Allocator> *map_ptr_ = nullptr;
 
     Map() noexcept = default;
+
+    template<typename Type, typename AllocT = allocator_type,
+            std::enable_if_t<std::is_pod_v<Type>, Type> * = nullptr>
+    Type get_obj_copy(const Type &ojb) const {
+        return ojb;
+    }
+
+    template<typename Type, typename AllocT = allocator_type,
+            std::enable_if_t<std::is_pod_v<Type>, Type> * = nullptr>
+    Type get_obj_copy(Type &&ojb) const {
+        return std::forward<Type>(ojb);
+    }
+
+    template<typename Type, typename AllocT = allocator_type,
+            std::enable_if<std::uses_allocator_v<Type, AllocT>
+                           && std::is_constructible_v<Type, Type, AllocT>, Type> * = nullptr>
+    Type get_obj_copy(const Type &ojb) const {
+        return {ojb, get_allocator()};
+    }
+
+    template<typename Type, typename AllocT = allocator_type,
+            std::enable_if<std::uses_allocator_v<Type, AllocT>
+                           && std::is_constructible_v<Type, Type, AllocT>, Type> * = nullptr>
+    Type get_obj_copy(Type &&ojb) const {
+        return {std::forward<Type>(ojb), get_allocator()};
+    }
+
+    template<typename Type, typename AllocT = allocator_type,
+            std::enable_if_t<std::uses_allocator_v<Type, AllocT>
+                             && std::is_copy_assignable_v<Type>
+                             && std::is_constructible_v<Type, AllocT>, Type> * = nullptr>
+    Type get_obj_copy(const Type &ojb) const {
+        Type new_obj{get_allocator()};
+        new_obj = ojb;
+        return new_obj;
+    }
+
+    template<typename Type, typename AllocT = allocator_type,
+            std::enable_if_t<std::uses_allocator_v<Type, AllocT>
+                             && std::is_copy_assignable_v<Type>
+                             && std::is_constructible_v<Type, AllocT>, Type> * = nullptr>
+    Type get_obj_copy(Type &&ojb) const {
+        Type new_obj{get_allocator()};
+        new_obj = std::forward<Type>(ojb);
+        return new_obj;
+    }
 };
 
 }
