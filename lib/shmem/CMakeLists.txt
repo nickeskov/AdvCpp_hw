@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(hw)
+project(shmem)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -30,6 +30,8 @@ if (ENABLE_COVERAGE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}")
 endif ()
 
+option(ENABLE_SANITIZE "Enable sanitizers to ${PROJECT_NAME} target(s)" OFF)
+
 if (ENABLE_SANITIZE)
     message("Sanitizers ENABLED for ${PROJECT_NAME}")
 
@@ -45,7 +47,7 @@ if (ENABLE_CPPCHECK)
     # set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
     list(APPEND ${PROJECT_NAME}_CPPCHECK_ARGS
-            --enable=warning,style,performance,portability,unusedFunction
+            --enable=warning,style,performance,portability
             --check-library
             --std=c++11
             --verbose
@@ -66,54 +68,15 @@ endif ()
 
 # ------------------------------------------------------------------------------
 
-option(HW_ENABLE_HW1 "Enable hw1 tests and build all additional hw1 libraries for ${PROJECT_NAME}" OFF)
-option(HW_ENABLE_HW2 "Enable hw2 tests and build all additional hw2 libraries for ${PROJECT_NAME}" OFF)
-option(HW_ENABLE_HW3 "Enable hw3 tests and build all additional hw3 libraries for ${PROJECT_NAME}" OFF)
-option(HW_ENABLE_HW4 "Enable hw4 tests and build all additional hw4 libraries for ${PROJECT_NAME}" OFF)
-option(HW_ENABLE_ALL "Enable all hw tests and build all libraries for ${PROJECT_NAME}" OFF)
+add_library(shmem STATIC
+        include/shmem/allocators/linear_allocator.h
+        include/shmem/containers/map.h
+        src/errors.cpp
+        )
 
-add_executable(hw
-        src/main.cpp
-        src/utils.cpp)
+target_include_directories(shmem PUBLIC include)
 
-target_compile_options(hw PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
+target_link_libraries(shmem PRIVATE raiiguards)
+target_link_libraries(shmem PRIVATE concurrentsync)
 
-target_include_directories(hw PRIVATE include)
-
-add_subdirectory(lib/unixprimwrap)
-target_link_libraries(hw unixprimwrap)
-
-add_subdirectory(lib/raiiguards)
-target_link_libraries(hw raiiguards)
-
-if (HW_ENABLE_ALL OR HW_ENABLE_HW1)
-    add_subdirectory(lib/linuxproc)
-    target_link_libraries(hw linuxproc)
-    target_compile_definitions(hw PRIVATE HW_ENABLE_HW1)
-endif ()
-
-if (HW_ENABLE_ALL OR HW_ENABLE_HW2)
-    add_subdirectory(lib/trivilog)
-    target_link_libraries(hw trivilog)
-    target_compile_definitions(hw PRIVATE HW_ENABLE_HW2)
-endif ()
-
-if (HW_ENABLE_ALL OR HW_ENABLE_HW3 OR HW_ENABLE_HW4)
-    add_subdirectory(lib/tcpcon)
-    target_link_libraries(hw tcpcon)
-
-    if (HW_ENABLE_ALL OR HW_ENABLE_HW3)
-        target_compile_definitions(hw PRIVATE HW_ENABLE_HW3)
-    endif ()
-
-    if (HW_ENABLE_ALL OR HW_ENABLE_HW4)
-        target_compile_definitions(hw PRIVATE HW_ENABLE_HW4)
-    endif ()
-endif ()
-
-if (HW_ENABLE_ALL OR HW_ENABLE_HW5)
-    add_subdirectory(lib/shmem)
-    add_subdirectory(lib/concurrentsync)
-    target_link_libraries(hw shmem)
-    target_compile_definitions(hw PRIVATE HW_ENABLE_HW5)
-endif ()
+target_compile_options(shmem PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
