@@ -7,9 +7,11 @@
 
 namespace shmem::types {
 
-using string = std::basic_string<char, std::char_traits<char>, shmem::allocators::LinearAllocator<char>);
+template<typename Allocator = shmem::allocators::LinearAllocator<char>>
+using string = std::basic_string<char, std::char_traits<char>, Allocator>;
 
-using wstring = std::basic_string<wchar_t, std::char_traits<wchar_t>, shmem::allocators::LinearAllocator<wchar_t>>
+template<typename Allocator = shmem::allocators::LinearAllocator<wchar_t>>
+using wstring = std::basic_string<wchar_t, std::char_traits<wchar_t>, Allocator>;
 
 }
 
