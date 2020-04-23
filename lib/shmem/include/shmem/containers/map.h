@@ -28,54 +28,54 @@ class Map {
     using size_type = size_t;
 
     explicit Map(Allocator &allocator, bool is_interprocess_map) {
-        using alloc_ptr_t = typename std::allocator_traits<Allocator>::pointer;
+        using mutex_allocator_t = typename std::allocator_traits<Allocator>::
+        template rebind_alloc<concurrentsync::Mutex>;
 
         concurrentsync::Mutex *mutex_mem;
-        constexpr size_t mutex_size = sizeof(concurrentsync::Mutex);
+        mutex_allocator_t mutex_allocator{allocator};
 
-        mutex_mem = reinterpret_cast<concurrentsync::Mutex *>(
-                std::allocator_traits<Allocator>::allocate(
-                        allocator, mutex_size
-                )
+        mutex_mem = std::allocator_traits<mutex_allocator_t>::allocate(
+                mutex_allocator, 1
         );
 
+        using map_allocator_t = typename std::allocator_traits<Allocator>::
+        template rebind_alloc<std::map<Key, T, Compare, Allocator>>;
+
         std::map<Key, T, Compare, Allocator> *map_mem;
-        constexpr size_t map_size = sizeof(std::map<Key, T, Compare, Allocator>);
+        map_allocator_t map_allocator{allocator};
 
         try {
-            map_mem = reinterpret_cast<std::map<Key, T, Compare, Allocator> *>(
-                    std::allocator_traits<Allocator>::allocate(
-                            allocator, map_size
-                    )
+            map_mem = std::allocator_traits<map_allocator_t>::allocate(
+                    map_allocator, 1
             );
         } catch (...) {
-            std::allocator_traits<Allocator>::deallocate(allocator,
-                                                         reinterpret_cast<alloc_ptr_t>(mutex_mem),
-                                                         mutex_size);
+            std::allocator_traits<mutex_allocator_t>::deallocate(
+                    mutex_allocator, mutex_mem, 1
+            );
             throw;
         }
 
         try {
             mutex_ptr_ = new(mutex_mem) concurrentsync::Mutex{is_interprocess_map};
         } catch (...) {
-            std::allocator_traits<Allocator>::deallocate(allocator,
-                                                         reinterpret_cast<alloc_ptr_t>(map_mem),
-                                                         map_size);
-            std::allocator_traits<Allocator>::deallocate(allocator,
-                                                         reinterpret_cast<alloc_ptr_t>(mutex_mem),
-                                                         mutex_size);
+            std::allocator_traits<map_allocator_t>::deallocate(
+                    map_allocator, map_mem, 1
+            );
+            std::allocator_traits<mutex_allocator_t>::deallocate(
+                    mutex_allocator, mutex_mem, 1
+            );
             throw;
         }
         try {
             map_ptr_ = new(map_mem) std::map<Key, T, Compare, Allocator>{allocator};
         } catch (...) {
             mutex_ptr_->~Mutex();
-            std::allocator_traits<Allocator>::deallocate(allocator,
-                                                         reinterpret_cast<alloc_ptr_t>(map_mem),
-                                                         map_size);
-            std::allocator_traits<Allocator>::deallocate(allocator,
-                                                         reinterpret_cast<alloc_ptr_t>(mutex_mem),
-                                                         mutex_size);
+            std::allocator_traits<map_allocator_t>::deallocate(
+                    map_allocator, map_mem, 1
+            );
+            std::allocator_traits<mutex_allocator_t>::deallocate(
+                    mutex_allocator, mutex_mem, 1
+            );
             throw;
         }
     }
@@ -106,9 +106,12 @@ class Map {
         return map_ptr_->get_allocator();
     }
 
-    T at(const key_type &key) {
+    template<typename NewKey>
+    T at(const NewKey &key) {
         std::lock_guard<concurrentsync::Mutex> lock(*mutex_ptr_);
-        T value = get_obj_copy(map_ptr_->at(key));
+        auto node_key = get_obj_copy<key_type, NewKey, allocator_type>(key);
+        auto obj = map_ptr_->at(node_key);
+        T value = get_obj_copy<NewKey, T, allocator_type>(obj);
         return value;
     }
 
@@ -118,10 +121,11 @@ class Map {
         return map_ptr_->extract(key);
     }
 
-    void insert(const value_type &value) {
+    template<typename NewKey, typename NewT>
+    void insert(const NewKey &key, const NewT &value) {
         std::lock_guard<concurrentsync::Mutex> lock(*mutex_ptr_);
-        auto node_key = get_obj_copy(value.first);
-        auto node_value = get_obj_copy(value.second);
+        auto node_key = get_obj_copy<key_type, NewKey, allocator_type>(key);
+        auto node_value = get_obj_copy<T, NewT, allocator_type>(value);
         map_ptr_->emplace(std::make_pair(std::move(node_key), std::move(node_value)));
     }
 
@@ -155,7 +159,7 @@ class Map {
         return map_ptr_->find(key) != map_ptr_->cend();
     }
 
-    ~Map() noexcept {
+    void destroy() noexcept {
         if (map_ptr_ != nullptr && mutex_ptr_ != nullptr) {
             map_ptr_->clear();
             map_ptr_->~map();
@@ -163,27 +167,36 @@ class Map {
         }
     }
 
+    ~Map() noexcept = default;
+
   private:
     mutable concurrentsync::Mutex *mutex_ptr_ = nullptr;
     std::map<Key, T, Compare, Allocator> *map_ptr_ = nullptr;
 
     Map() noexcept = default;
 
-    template<typename Type, typename AllocT = allocator_type,
-            std::enable_if_t<std::is_pod_v<std::decay<Type>>, void> * = nullptr>
-    auto get_obj_copy(Type &&ojb) const {
-        return std::forward<Type>(ojb);
+//    // TODO its not working :(
+//    template<typename RetT, typename Type, typename AllocT = allocator_type,
+//            std::enable_if_t<
+//                    std::uses_allocator_v<RetT, AllocT>
+//                    &&
+//                    std::is_copy_assignable_v<std::decay<Type>> &&
+//                    std::is_constructible_v<std::decay_t<Type>, AllocT>
+//                    , void> * = nullptr>
+//    RetT get_obj_copy(const Type &ojb) const {
+//        RetT new_obj{get_allocator()};
+//        new_obj = ojb;
+//        return new_obj;
+//    }
+
+    template<typename RetT, typename Type, typename AllocT = allocator_type,
+            std::enable_if_t<
+                    std::is_pod_v<RetT>
+                    && std::is_constructible_v<RetT, Type>, void> * = nullptr>
+    RetT get_obj_copy(const Type &ojb) const {
+        return {ojb};
     }
 
-    template<typename Type, typename AllocT = allocator_type,
-            std::enable_if_t<std::uses_allocator_v<std::decay<Type>, AllocT>
-                             && std::is_copy_assignable_v<std::decay<Type>>
-                             && std::is_constructible_v<std::decay<Type>, AllocT>, void> * = nullptr>
-    auto get_obj_copy(Type &&ojb) const {
-        auto new_obj{get_allocator()};
-        new_obj = std::forward<Type>(ojb);
-        return new_obj;
-    }
 };
 
 }

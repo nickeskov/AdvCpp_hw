@@ -107,13 +107,14 @@ T *LinearAllocator<T>::allocate(size_type size) {
         return nullptr;
     }
 
-    void *old_free_shmem_addr = shared_state_->free_shmem_address;
     void *new_free_mem_addr =
-            static_cast<byte_ptr_type>(shared_state_->free_shmem_address) + size;
+            static_cast<byte_ptr_type>(shared_state_->free_shmem_address) + size * sizeof(T);
 
     if (new_free_mem_addr > shared_state_->end_shmem_address) {
         throw std::bad_alloc();
     }
+
+    void *old_free_shmem_addr = shared_state_->free_shmem_address;
 
     shared_state_->free_shmem_address = new_free_mem_addr;
 
@@ -132,10 +133,10 @@ void LinearAllocator<T>::deallocate(T *ptr, size_type size) {
     }
 
     void *old_free_shmem_addr = shared_state_->free_shmem_address;
-    void *new_free_mem_addr =
-            static_cast<byte_ptr_type>(shared_state_->free_shmem_address) - size;
 
     if (ptr == old_free_shmem_addr) {
+        void *new_free_mem_addr =
+                static_cast<byte_ptr_type>(shared_state_->free_shmem_address) - size * sizeof(T);
         shared_state_->free_shmem_address = new_free_mem_addr;
     }
 }

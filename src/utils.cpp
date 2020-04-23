@@ -35,6 +35,7 @@ extern "C" {
 #include "shmem/shared_memory.h"
 #include "shmem/allocators/linear_allocator.h"
 #include "shmem/containers/map.h"
+#include "shmem/types.h"
 
 #endif
 
@@ -316,31 +317,30 @@ void hw5_test() {
 #ifdef HW_ENABLE_HW5
 
     std::cout << "---------hw5 test---------" << std::endl;
+
     auto shmem_ptr = shmem::create_shmem<std::byte>(memsize::MEGABYTE);
-    auto ptr = shmem_ptr.get();
+    auto shallocator = shmem::allocators::LinearAllocator<std::byte>(shmem_ptr.get(), memsize::KILOBYTE);
 
+    auto pair_allocator = shmem::allocators::LinearAllocator<std::pair<const int, int>>{shallocator};
 
-    auto shallocator = shmem::allocators::LinearAllocator<std::byte>(ptr,
-                                                                     memsize::MEGABYTE);
+    shmem::containers::Map<int, int, std::less<>, decltype(pair_allocator)> shmap{pair_allocator, true};
 
-    shmem::containers::Map<int, int, std::less<int>, decltype(shallocator)> shmap{shallocator, true};
+    unixprimwrap::Fork child_fork;
+    if (!child_fork.is_valid()) {
+        throw std::runtime_error("hw4: fork failed");
+    }
 
-//    unixprimwrap::Fork child_fork;
-//    if (!child_fork.is_valid()) {
-//        throw std::runtime_error("hw4: fork failed");
-//    }
-//
-//    if (child_fork.is_child()) {
-//        return;
-//    }
+    if (child_fork.is_child()) {
+        shmap.insert(1, 1);
+        return;
+    }
 
-    shmap.insert(std::make_pair(1, 1));
-
-    auto sleep_duration = std::chrono::milliseconds(1000); // 10 millisecond
+    auto sleep_duration = std::chrono::milliseconds(10); // 10 millisecond
     std::this_thread::sleep_for(sleep_duration);
 
     auto kek = shmap.at(1);
 
+    shmap.destroy();
     std::cout << kek << std::endl;
 
 #endif
