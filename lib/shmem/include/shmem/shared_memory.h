@@ -6,7 +6,7 @@
 
 extern "C" {
 #include <sys/mman.h>
-};
+}
 
 namespace shmem {
 

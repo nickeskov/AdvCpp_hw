@@ -1,10 +1,10 @@
-#include "concurrentsync/mutex.h"
-#include "concurrentsync/errors.h"
+#include "shmem/concurrentsync/mutex.h"
+#include "shmem/errors.h"
 
 #include <cerrno>
 #include <utility>
 
-namespace concurrentsync {
+namespace shmem::concurrentsync {
 
 Mutex::Mutex(bool is_process_mutex): is_empty_(false) {
     if (::sem_init(&mutex_, static_cast<int>(is_process_mutex), 1) < 0) {

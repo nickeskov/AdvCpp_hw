@@ -1,11 +1,11 @@
-#ifndef CONCURRENTSYNC_CONCURRENTSYNC_MUTEX_H
-#define CONCURRENTSYNC_CONCURRENTSYNC_MUTEX_H
+#ifndef SHMEM_SHMEM_CONCURRENTSYNC_MUTEX_H
+#define SHMEM_SHMEM_CONCURRENTSYNC_MUTEX_H
 
 extern "C" {
 #include "semaphore.h"
 }
 
-namespace concurrentsync {
+namespace shmem::concurrentsync {
 
 class Mutex {
   public:
@@ -38,4 +38,4 @@ class Mutex {
 
 }
 
-#endif //CONCURRENTSYNC_CONCURRENTSYNC_MUTEX_H
+#endif //SHMEM_SHMEM_CONCURRENTSYNC_MUTEX_H

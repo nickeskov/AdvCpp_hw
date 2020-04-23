@@ -84,7 +84,6 @@ add_subdirectory(lib/unixprimwrap)
 target_link_libraries(hw unixprimwrap)
 
 add_subdirectory(lib/raiiguards)
-target_link_libraries(hw raiiguards)
 
 if (HW_ENABLE_ALL OR HW_ENABLE_HW1)
     add_subdirectory(lib/linuxproc)
@@ -113,7 +112,6 @@ endif ()
 
 if (HW_ENABLE_ALL OR HW_ENABLE_HW5)
     add_subdirectory(lib/shmem)
-    add_subdirectory(lib/concurrentsync)
     target_link_libraries(hw shmem)
     target_compile_definitions(hw PRIVATE HW_ENABLE_HW5)
 endif ()

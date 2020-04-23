@@ -8,9 +8,8 @@
 #include <mutex>
 
 #include "shmem/allocators/linear_allocator.h"
-#include "concurrentsync/mutex.h"
-#include "concurrentsync/errors.h"
-#include "raiiguards/scope_guard.h"
+#include "shmem/concurrentsync/mutex.h"
+#include "shmem/errors.h"
 
 namespace shmem::containers {
 
@@ -26,6 +25,7 @@ class Map {
     using value_type = std::pair<const Key, T>;
     using allocator_type = Allocator;
     using key_compare = Compare;
+    using size_type = decltype(std::map<Key, T, Compare, Allocator>::size_type);
 
     explicit Map(const Allocator &allocator) {
         concurrentsync::Mutex *mutex_mem;
@@ -93,22 +93,54 @@ class Map {
         return map_ptr_->get_allocator();
     }
 
-    T at(const Key &key) {
-        std::lock_guard<concurrentsync::Mutex> guard(*mutex_ptr_);
-        T value = map_ptr_->at(key);
+    T at(const key_type &key) {
+        std::lock_guard<concurrentsync::Mutex> lock(*mutex_ptr_);
+        T value = get_obj_copy(map_ptr_->at(key));
         return value;
     }
 
-    auto extract(const Key &key) {
-        std::lock_guard<concurrentsync::Mutex> guard(*mutex_ptr_);
+    auto extract(const key_type &key) {
+        std::lock_guard<concurrentsync::Mutex> lock(*mutex_ptr_);
         mutex_ptr_->lock();
         return map_ptr_->extract(key);
     }
 
-//    template<std::enable_if<std::is_trivially_copyable_v<T>, void> *>
-//    void emplace(const value_type &value) {
-//        std::lock_guard<concurrentsync::Mutex> guard(*mutex_ptr_);
-//    }
+    void insert(const value_type &value) {
+        std::lock_guard<concurrentsync::Mutex> lock(*mutex_ptr_);
+        auto node_key = get_obj_copy(value.first);
+        auto node_value = get_obj_copy(value.second);
+        map_ptr_->emplace(std::make_pair(std::move(node_key), std::move(node_value)));
+    }
+
+    size_type erase(const key_type &key) {
+        std::lock_guard<concurrentsync::Mutex> lock(*mutex_ptr_);
+        return map_ptr_->erase(key);
+    }
+
+    void clear() {
+        std::lock_guard<concurrentsync::Mutex> lock(*mutex_ptr_);
+        map_ptr_->clear();
+    }
+
+    bool empty() const {
+        std::lock_guard<concurrentsync::Mutex> lock(*mutex_ptr_);
+        return map_ptr_->empty();
+    }
+
+    size_type size() const {
+        std::lock_guard<concurrentsync::Mutex> lock(*mutex_ptr_);
+        return map_ptr_->size();
+    }
+
+    size_type count(const key_type &key) const {
+        std::lock_guard<concurrentsync::Mutex> lock(*mutex_ptr_);
+        return map_ptr_->count(key);
+    }
+
+    bool contains(const key_type &key) const {
+        std::lock_guard<concurrentsync::Mutex> lock(*mutex_ptr_);
+        return map_ptr_->find(key) != map_ptr_->cend();
+    }
 
     ~Map() noexcept {
         if (map_ptr_ != nullptr && mutex_ptr_ != nullptr) {
@@ -119,7 +151,7 @@ class Map {
     }
 
   private:
-    concurrentsync::Mutex *mutex_ptr_ = nullptr;
+    mutable concurrentsync::Mutex *mutex_ptr_ = nullptr;
     std::map<Key, T, Compare, Allocator> *map_ptr_ = nullptr;
 
     Map() noexcept = default;

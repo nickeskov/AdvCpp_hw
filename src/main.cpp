@@ -9,6 +9,7 @@ int main() {
         hw2_test();
         hw3_test();
         hw4_test();
+        hw5_test();
     }
     catch (std::exception &e) {
         std::cout << e.what() << std::endl;

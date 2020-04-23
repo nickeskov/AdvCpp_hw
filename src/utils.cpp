@@ -30,6 +30,10 @@ extern "C" {
 }
 #endif
 
+#ifdef HW_ENABLE_HW5
+
+#endif
+
 #include <array>
 #include <iostream>
 #include <stdexcept>
@@ -279,6 +283,12 @@ void hw4_test() {
     client2.close();
 
     std::this_thread::sleep_for(sleep_duration);
+
+#endif
+}
+
+void hw5_test() {
+#ifdef HW_ENABLE_HW5
 
 #endif
 }

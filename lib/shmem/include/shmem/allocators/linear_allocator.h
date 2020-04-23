@@ -12,8 +12,7 @@ extern "C" {
 }
 
 #include "shmem/errors.h"
-#include "concurrentsync/mutex.h"
-#include "concurrentsync/errors.h"
+#include "shmem/concurrentsync/mutex.h"
 
 namespace shmem::allocators {
 

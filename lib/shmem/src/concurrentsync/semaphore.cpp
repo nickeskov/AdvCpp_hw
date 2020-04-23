@@ -1,10 +1,10 @@
-#include "concurrentsync/semaphore.h"
-#include "concurrentsync/errors.h"
+#include "shmem/concurrentsync/semaphore.h"
+#include "shmem/errors.h"
 
 #include <cerrno>
 #include <utility>
 
-namespace concurrentsync {
+namespace shmem::concurrentsync {
 
 Semaphore::Semaphore(bool is_process_semaphore, unsigned int value): is_empty_(false) {
     if (::sem_init(&semaphore_, static_cast<int>(is_process_semaphore), value) < 0) {

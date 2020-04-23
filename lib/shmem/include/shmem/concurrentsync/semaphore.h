@@ -1,11 +1,11 @@
-#ifndef CONCURRENTSYNC_CONCURRENTSYNC_SEMAPHORE_H
-#define CONCURRENTSYNC_CONCURRENTSYNC_SEMAPHORE_H
+#ifndef SHMEM_SHMEM_CONCURRENTSYNC_SEMAPHORE_H
+#define SHMEM_SHMEM_CONCURRENTSYNC_SEMAPHORE_H
 
 extern "C" {
 #include <semaphore.h>
 }
 
-namespace concurrentsync {
+namespace shmem::concurrentsync {
 
 class Semaphore {
   public:
@@ -38,4 +38,4 @@ class Semaphore {
 
 }
 
-#endif //CONCURRENTSYNC_CONCURRENTSYNC_SEMAPHORE_H
+#endif //SHMEM_SHMEM_CONCURRENTSYNC_SEMAPHORE_H

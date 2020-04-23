@@ -69,16 +69,11 @@ endif ()
 # ------------------------------------------------------------------------------
 
 add_library(shmem STATIC
-        include/shmem/allocators/linear_allocator.h
-        include/shmem/containers/map.h
-        include/shmem/types.h
-        include/shmem/shared_memory.h
         src/errors.cpp
+        src/concurrentsync/semaphore.cpp
+        src/concurrentsync/mutex.cpp
         )
 
 target_include_directories(shmem PUBLIC include)
-
-target_link_libraries(shmem PRIVATE raiiguards)
-target_link_libraries(shmem PRIVATE concurrentsync)
 
 target_compile_options(shmem PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
