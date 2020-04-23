@@ -32,6 +32,10 @@ extern "C" {
 
 #ifdef HW_ENABLE_HW5
 
+#include "shmem/shared_memory.h"
+#include "shmem/allocators/linear_allocator.h"
+#include "shmem/containers/map.h"
+
 #endif
 
 #include <array>
@@ -287,8 +291,57 @@ void hw4_test() {
 #endif
 }
 
+#ifdef HW_ENABLE_HW5
+
+namespace {
+
+namespace memsize {
+
+enum : size_t {
+    BYTE = sizeof(std::byte),
+    KILOBYTE = BYTE * 1024,
+    MEGABYTE = KILOBYTE * 1024,
+    GIGABYTE = MEGABYTE * 1024,
+    TERABYTE = GIGABYTE * 1024,
+    PETABYTE = TERABYTE * 1024
+};
+
+}
+
+}
+
+#endif
+
 void hw5_test() {
 #ifdef HW_ENABLE_HW5
+
+    std::cout << "---------hw5 test---------" << std::endl;
+    auto shmem_ptr = shmem::create_shmem<std::byte>(memsize::MEGABYTE);
+    auto ptr = shmem_ptr.get();
+
+
+    auto shallocator = shmem::allocators::LinearAllocator<std::byte>(ptr,
+                                                                     memsize::MEGABYTE);
+
+    shmem::containers::Map<int, int, std::less<int>, decltype(shallocator)> shmap{shallocator, true};
+
+//    unixprimwrap::Fork child_fork;
+//    if (!child_fork.is_valid()) {
+//        throw std::runtime_error("hw4: fork failed");
+//    }
+//
+//    if (child_fork.is_child()) {
+//        return;
+//    }
+
+    shmap.insert(std::make_pair(1, 1));
+
+    auto sleep_duration = std::chrono::milliseconds(1000); // 10 millisecond
+    std::this_thread::sleep_for(sleep_duration);
+
+    auto kek = shmap.at(1);
+
+    std::cout << kek << std::endl;
 
 #endif
 }

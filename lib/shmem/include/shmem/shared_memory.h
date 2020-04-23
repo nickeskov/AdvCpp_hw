@@ -11,10 +11,10 @@ extern "C" {
 namespace shmem {
 
 template<typename T>
-using ShmemUniquePtr = std::unique_ptr<T, std::function<void(T *)>>;
+using shmem_unique_ptr = std::unique_ptr<T, std::function<void(T *)>>;
 
 template<typename T>
-ShmemUniquePtr<T> create_shmem(size_t size) {
+shmem_unique_ptr<T> create_shmem(size_t size) {
     void *mmap_ptr = ::mmap(nullptr,
                             sizeof(T) * size,
                             PROT_WRITE | PROT_READ,

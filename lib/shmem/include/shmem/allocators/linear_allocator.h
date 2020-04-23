@@ -16,12 +16,25 @@ extern "C" {
 
 namespace shmem::allocators {
 
+struct LinearAllocatorSharedState {
+  public:
+    void *start_shmem_address = nullptr;
+    void *end_shmem_address = nullptr;
+    void *free_shmem_address = nullptr;
+};
+
 template<typename T>
 class LinearAllocator {
   public:
     using value_type = T;
+    using size_type = size_t;
 
-    explicit LinearAllocator(void *mmap_address, size_t mmap_size);
+    template<typename NewT>
+    struct rebind {
+        using other = LinearAllocator<NewT>;
+    };
+
+    explicit LinearAllocator(void *mmap_address, size_type mmap_size);
 
     template<typename NewT>
     explicit LinearAllocator(const LinearAllocator<NewT> &other) noexcept
@@ -49,44 +62,38 @@ class LinearAllocator {
     }
 
     template<typename NewT>
-    void swap(const LinearAllocator<NewT> &other) noexcept {
+    void swap(LinearAllocator<NewT> &other) noexcept {
         std::swap(shared_state_, other.shared_state_);
     }
 
-    T *allocate(size_t size);
+    T *allocate(size_type size);
 
-    void deallocate(T *ptr, size_t size);
+    void deallocate(T *ptr, size_type size);
 
     ~LinearAllocator() noexcept;
 
-  private:
+  public:
     using byte_type = std::byte;
     using byte_ptr_type = byte_type *;
 
-    struct SharedState {
-        void *start_shmem_address = nullptr;
-        void *end_shmem_address = nullptr;
-        void *free_shmem_address = nullptr;
-    };
+    LinearAllocatorSharedState *shared_state_ = nullptr;
 
-    SharedState *shared_state_ = nullptr;
-
+  private:
     LinearAllocator() noexcept = default;
 };
 
-
 template<typename T>
-LinearAllocator<T>::LinearAllocator(void *mmap_address, size_t mmap_size) {
-    size_t init_used_mem_size = sizeof(SharedState) + sizeof(concurrentsync::Mutex);
+LinearAllocator<T>::LinearAllocator(void *mmap_address, size_type mmap_size) {
+    size_type init_used_mem_size = sizeof(LinearAllocatorSharedState) + sizeof(concurrentsync::Mutex);
     auto mmap_byte_addr = static_cast<byte_ptr_type>(mmap_address);
 
     if (mmap_byte_addr + init_used_mem_size > mmap_byte_addr + mmap_size) {
         throw std::bad_alloc();
     }
 
-    shared_state_ = new(static_cast<SharedState *>(mmap_address)) SharedState;
+    shared_state_ = new(static_cast<LinearAllocatorSharedState *>(mmap_address)) LinearAllocatorSharedState;
 
-    void *sem_addr = static_cast<SharedState *>(mmap_address) + 1;
+    void *sem_addr = static_cast<LinearAllocatorSharedState *>(mmap_address) + 1;
     shared_state_->start_shmem_address = static_cast<concurrentsync::Mutex *>(sem_addr) + 1;
 
     shared_state_->end_shmem_address =
@@ -95,7 +102,7 @@ LinearAllocator<T>::LinearAllocator(void *mmap_address, size_t mmap_size) {
 }
 
 template<typename T>
-T *LinearAllocator<T>::allocate(size_t size) {
+T *LinearAllocator<T>::allocate(size_type size) {
     if (size == 0) {
         return nullptr;
     }
@@ -114,7 +121,7 @@ T *LinearAllocator<T>::allocate(size_t size) {
 }
 
 template<typename T>
-void LinearAllocator<T>::deallocate(T *ptr, size_t size) {
+void LinearAllocator<T>::deallocate(T *ptr, size_type size) {
     if (ptr == nullptr) {
         return;
     }
@@ -136,7 +143,7 @@ void LinearAllocator<T>::deallocate(T *ptr, size_t size) {
 template<typename T>
 LinearAllocator<T>::~LinearAllocator() noexcept {
     if (shared_state_ != nullptr) {
-        shared_state_->~SharedState();
+        shared_state_->~LinearAllocatorSharedState();
     }
 }
 

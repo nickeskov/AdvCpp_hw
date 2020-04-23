@@ -75,5 +75,6 @@ add_library(shmem STATIC
         )
 
 target_include_directories(shmem PUBLIC include)
+target_link_libraries(shmem PRIVATE pthread)
 
 target_compile_options(shmem PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
