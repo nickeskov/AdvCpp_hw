@@ -318,12 +318,14 @@ void hw5_test() {
 
     std::cout << "---------hw5 test---------" << std::endl;
 
-    auto shmem_ptr = shmem::create_shmem<std::byte>(memsize::MEGABYTE);
-    auto shallocator = shmem::allocators::LinearAllocator<std::byte>(shmem_ptr.get(), memsize::KILOBYTE);
+    auto shmem_ptr = shmem::create_shmem<std::byte>(memsize::KILOBYTE);
+    shmem::allocators::LinearAllocator<std::byte>
+            shallocator{shmem_ptr.get(), memsize::KILOBYTE};
 
-    auto pair_allocator = shmem::allocators::LinearAllocator<std::pair<const int, int>>{shallocator};
+    shmem::allocators::LinearAllocator<std::pair<const int, int>> pair_allocator{shallocator};
 
-    shmem::containers::Map<int, int, std::less<>, decltype(pair_allocator)> shmap{pair_allocator, true};
+    shmem::containers::Map<int, int, std::less<>, decltype(pair_allocator)>
+            shmap{pair_allocator, true};
 
     unixprimwrap::Fork child_fork;
     if (!child_fork.is_valid()) {

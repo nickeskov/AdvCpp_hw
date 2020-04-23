@@ -27,30 +27,25 @@ class Map {
     using key_compare = Compare;
     using size_type = size_t;
 
-    explicit Map(Allocator &allocator, bool is_interprocess_map) {
-        using mutex_allocator_t = typename std::allocator_traits<Allocator>::
-        template rebind_alloc<concurrentsync::Mutex>;
+    explicit Map(Allocator &allocator, bool is_interprocess_map)
+            : mutex_allocator_ptr_(std::make_unique<mutex_allocator_t>(allocator)),
+              map_allocator_ptr_(std::make_unique<map_allocator_t>(allocator)) {
 
         concurrentsync::Mutex *mutex_mem;
-        mutex_allocator_t mutex_allocator{allocator};
 
         mutex_mem = std::allocator_traits<mutex_allocator_t>::allocate(
-                mutex_allocator, 1
+                *mutex_allocator_ptr_, 1
         );
 
-        using map_allocator_t = typename std::allocator_traits<Allocator>::
-        template rebind_alloc<std::map<Key, T, Compare, Allocator>>;
-
         std::map<Key, T, Compare, Allocator> *map_mem;
-        map_allocator_t map_allocator{allocator};
 
         try {
             map_mem = std::allocator_traits<map_allocator_t>::allocate(
-                    map_allocator, 1
+                    *map_allocator_ptr_, 1
             );
         } catch (...) {
             std::allocator_traits<mutex_allocator_t>::deallocate(
-                    mutex_allocator, mutex_mem, 1
+                    *mutex_allocator_ptr_, mutex_mem, 1
             );
             throw;
         }
@@ -59,10 +54,10 @@ class Map {
             mutex_ptr_ = new(mutex_mem) concurrentsync::Mutex{is_interprocess_map};
         } catch (...) {
             std::allocator_traits<map_allocator_t>::deallocate(
-                    map_allocator, map_mem, 1
+                    *map_allocator_ptr_, map_mem, 1
             );
             std::allocator_traits<mutex_allocator_t>::deallocate(
-                    mutex_allocator, mutex_mem, 1
+                    *mutex_allocator_ptr_, mutex_mem, 1
             );
             throw;
         }
@@ -71,10 +66,10 @@ class Map {
         } catch (...) {
             mutex_ptr_->~Mutex();
             std::allocator_traits<map_allocator_t>::deallocate(
-                    map_allocator, map_mem, 1
+                    *map_allocator_ptr_, map_mem, 1
             );
             std::allocator_traits<mutex_allocator_t>::deallocate(
-                    mutex_allocator, mutex_mem, 1
+                    *mutex_allocator_ptr_, mutex_mem, 1
             );
             throw;
         }
@@ -100,18 +95,25 @@ class Map {
     void swap(Map &other) noexcept {
         std::swap(mutex_ptr_, other.mutex_ptr_);
         std::map(map_ptr_, other.map_ptr_);
+        std::swap(mutex_allocator_ptr_, other.mutex_allocator_ptr_);
+        std::swap(map_allocator_ptr_, other.map_allocator_ptr_);
     }
 
     allocator_type get_allocator() const noexcept {
         return map_ptr_->get_allocator();
     }
 
-    template<typename NewKey>
-    T at(const NewKey &key) {
+    T at(const Key &key) {
+        std::lock_guard<concurrentsync::Mutex> lock(*mutex_ptr_);
+        return map_ptr_->at(key);
+    }
+
+    template<typename NewKey, typename RetT = T>
+    RetT at(const NewKey &key) {
         std::lock_guard<concurrentsync::Mutex> lock(*mutex_ptr_);
         auto node_key = get_obj_copy<key_type, NewKey, allocator_type>(key);
         auto obj = map_ptr_->at(node_key);
-        T value = get_obj_copy<NewKey, T, allocator_type>(obj);
+        RetT value = obj;
         return value;
     }
 
@@ -164,14 +166,33 @@ class Map {
             map_ptr_->clear();
             map_ptr_->~map();
             mutex_ptr_->~Mutex();
+
+            std::allocator_traits<map_allocator_t>::deallocate(
+                    *map_allocator_ptr_, map_ptr_, 1
+            );
+            std::allocator_traits<mutex_allocator_t>::deallocate(
+                    *mutex_allocator_ptr_, mutex_ptr_, 1
+            );
         }
     }
 
     ~Map() noexcept = default;
 
   private:
+    using mutex_t = concurrentsync::Mutex;
+    using map_t = std::map<Key, T, Compare, Allocator>;
+
+    using mutex_allocator_t = typename std::allocator_traits<Allocator>::
+    template rebind_alloc<mutex_t>;
+
+    using map_allocator_t = typename std::allocator_traits<Allocator>::
+    template rebind_alloc<map_t>;
+
     mutable concurrentsync::Mutex *mutex_ptr_ = nullptr;
-    std::map<Key, T, Compare, Allocator> *map_ptr_ = nullptr;
+    map_t *map_ptr_ = nullptr;
+
+    std::unique_ptr<mutex_allocator_t> mutex_allocator_ptr_;
+    std::unique_ptr<map_allocator_t> map_allocator_ptr_;
 
     Map() noexcept = default;
 
