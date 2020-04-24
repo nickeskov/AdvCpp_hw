@@ -257,7 +257,7 @@ void hw4_test() {
     client1.write_from_io_buff(max_msg_len);
     client2.write_from_io_buff(max_msg_len);
 
-    auto sleep_duration = std::chrono::milliseconds(10); // 10 millisecond
+    auto sleep_duration = std::chrono::milliseconds(100); // 100 millisecond
 
     while (client1.read_in_io_buff(max_msg_len) < 0) {
         std::this_thread::sleep_for(sleep_duration);
