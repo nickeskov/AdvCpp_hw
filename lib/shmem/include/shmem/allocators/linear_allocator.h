@@ -2,17 +2,10 @@
 #define SHMEM_SHMEM_ALLOCATORS_LINEAR_ALLOCATOR_H
 
 #include <memory>
-#include <atomic>
-#include <shared_mutex>
 #include <cinttypes>
 #include <cstddef>
 
-extern "C" {
-#include <sys/mman.h>
-}
-
 #include "shmem/errors.h"
-#include "shmem/concurrentsync/mutex.h"
 
 namespace shmem::allocators {
 
@@ -37,7 +30,7 @@ class LinearAllocator {
     explicit LinearAllocator(void *mmap_address, size_type mmap_size);
 
     template<typename NewT>
-    explicit LinearAllocator(const LinearAllocator<NewT> &other) noexcept
+    LinearAllocator(const LinearAllocator<NewT> &other) noexcept // NOLINT explicit
             : shared_state_(other.shared_state_) {}
 
     template<typename NewT>
@@ -47,7 +40,7 @@ class LinearAllocator {
     }
 
     template<typename NewT>
-    explicit LinearAllocator(LinearAllocator<NewT> &&other) noexcept {
+    LinearAllocator(LinearAllocator<NewT> &&other) noexcept { // NOLINT explicit
         swap(other);
     }
 
@@ -74,7 +67,6 @@ class LinearAllocator {
 
   public:
     using byte_type = std::byte;
-    using byte_ptr_type = byte_type *;
 
     LinearAllocatorSharedState *shared_state_ = nullptr;
 
@@ -84,20 +76,21 @@ class LinearAllocator {
 
 template<typename T>
 LinearAllocator<T>::LinearAllocator(void *mmap_address, size_type mmap_size) {
-    size_type init_used_mem_size = sizeof(LinearAllocatorSharedState) + sizeof(concurrentsync::Mutex);
-    auto mmap_byte_addr = static_cast<byte_ptr_type>(mmap_address);
+    constexpr size_type init_used_mem_size = sizeof(LinearAllocatorSharedState);
+    auto mmap_byte_addr = static_cast<byte_type *>(mmap_address);
 
     if (mmap_byte_addr + init_used_mem_size > mmap_byte_addr + mmap_size) {
         throw std::bad_alloc();
     }
 
-    shared_state_ = new(static_cast<LinearAllocatorSharedState *>(mmap_address)) LinearAllocatorSharedState;
+    shared_state_ = new(static_cast<LinearAllocatorSharedState *>(mmap_address))
+            LinearAllocatorSharedState;
 
-    void *sem_addr = static_cast<LinearAllocatorSharedState *>(mmap_address) + 1;
-    shared_state_->start_shmem_address = static_cast<concurrentsync::Mutex *>(sem_addr) + 1;
+    shared_state_->start_shmem_address =
+            static_cast<LinearAllocatorSharedState *>(mmap_address) + 1;
 
     shared_state_->end_shmem_address =
-            static_cast<byte_ptr_type>(mmap_address) + mmap_size;
+            static_cast<byte_type *>(mmap_address) + mmap_size;
     shared_state_->free_shmem_address = shared_state_->start_shmem_address;
 }
 
@@ -108,7 +101,7 @@ T *LinearAllocator<T>::allocate(size_type size) {
     }
 
     void *new_free_mem_addr =
-            static_cast<byte_ptr_type>(shared_state_->free_shmem_address) + size * sizeof(T);
+            static_cast<byte_type *>(shared_state_->free_shmem_address) + size * sizeof(T);
 
     if (new_free_mem_addr > shared_state_->end_shmem_address) {
         throw std::bad_alloc();
@@ -136,7 +129,7 @@ void LinearAllocator<T>::deallocate(T *ptr, size_type size) {
 
     if (ptr == old_free_shmem_addr) {
         void *new_free_mem_addr =
-                static_cast<byte_ptr_type>(shared_state_->free_shmem_address) - size * sizeof(T);
+                static_cast<byte_type *>(shared_state_->free_shmem_address) - size * sizeof(T);
         shared_state_->free_shmem_address = new_free_mem_addr;
     }
 }

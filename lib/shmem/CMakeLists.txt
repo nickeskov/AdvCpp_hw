@@ -47,6 +47,7 @@ if (ENABLE_CPPCHECK)
     # set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
     list(APPEND ${PROJECT_NAME}_CPPCHECK_ARGS
+            --inline-suppr # only for this library
             --enable=warning,style,performance,portability
             --check-library
             --std=c++11

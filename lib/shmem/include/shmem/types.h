@@ -13,6 +13,9 @@ using string = std::basic_string<char, std::char_traits<char>, Allocator>;
 template<typename Allocator = shmem::allocators::LinearAllocator<wchar_t>>
 using wstring = std::basic_string<wchar_t, std::char_traits<wchar_t>, Allocator>;
 
+template<typename CharT = char, typename Allocator = shmem::allocators::LinearAllocator<char>>
+using basic_string = std::basic_string<CharT, std::char_traits<CharT>, Allocator>;
+
 }
 
 #endif //SHMEM_SHMEM_TYPES_H
