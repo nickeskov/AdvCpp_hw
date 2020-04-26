@@ -129,7 +129,28 @@ class Map {
         auto node_key = get_obj_copy<key_type, NewKey, allocator_type>(key);
         auto node_value = get_obj_copy<mapped_type, NewT, allocator_type>(value);
 
-        map_ptr_->emplace(std::make_pair(std::move(node_key), std::move(node_value)));
+        map_ptr_->emplace(std::move(node_key), std::move(node_value));
+    }
+
+    template<typename NewKey, typename NewT,
+            std::enable_if<std::is_assignable_v<mapped_type, NewT>> * = nullptr>
+    void insert_or_assign(const NewKey &key, NewT &&value) {
+        std::lock_guard<concurrentsync::Mutex> lock(*mutex_ptr_);
+
+        auto node_key = get_obj_copy<key_type, NewKey, allocator_type>(key);
+
+        map_ptr_->insert_or_assign(node_key, std::forward<NewT>(value));
+    }
+
+    template<typename NewKey, typename NewT,
+            std::enable_if<std::is_constructible_v<mapped_type, NewT>> * = nullptr>
+    void insert_or_assign(const NewKey &key, const NewT &value) {
+        std::lock_guard<concurrentsync::Mutex> lock(*mutex_ptr_);
+
+        auto node_key = get_obj_copy<key_type, NewKey, allocator_type>(key);
+        auto node_value = get_obj_copy<mapped_type, NewT, allocator_type>(value);
+
+        map_ptr_->insert_or_assign(node_key, node_value);
     }
 
     size_type erase(const key_type &key) {
