@@ -78,4 +78,8 @@ add_library(trivilog STATIC
 
 target_include_directories(trivilog PUBLIC include)
 
+find_package(Threads REQUIRED)
+
+target_link_libraries(trivilog PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+
 target_compile_options(trivilog PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
