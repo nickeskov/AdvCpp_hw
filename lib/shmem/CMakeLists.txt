@@ -76,6 +76,9 @@ add_library(shmem STATIC
         )
 
 target_include_directories(shmem PUBLIC include)
-target_link_libraries(shmem PRIVATE pthread)
+
+find_package(Threads REQUIRED)
+
+target_link_libraries(shmem PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 
 target_compile_options(shmem PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)
