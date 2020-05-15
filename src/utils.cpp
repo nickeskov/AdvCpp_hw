@@ -30,6 +30,15 @@ extern "C" {
 }
 #endif
 
+#ifdef HW_ENABLE_HW5
+
+#include "shmem/shared_memory.h"
+#include "shmem/allocators/linear_allocator.h"
+#include "shmem/containers/map.h"
+#include "shmem/types.h"
+
+#endif
+
 #include <array>
 #include <iostream>
 #include <stdexcept>
@@ -279,6 +288,102 @@ void hw4_test() {
     client2.close();
 
     std::this_thread::sleep_for(sleep_duration);
+
+#endif
+}
+
+#ifdef HW_ENABLE_HW5
+
+namespace {
+
+namespace memsize {
+
+enum : size_t {
+    BYTE = sizeof(std::byte),
+    KILOBYTE = BYTE * 1024,
+    MEGABYTE = KILOBYTE * 1024,
+    GIGABYTE = MEGABYTE * 1024,
+    TERABYTE = GIGABYTE * 1024,
+    PETABYTE = TERABYTE * 1024
+};
+
+}
+
+}
+
+#endif
+
+void hw5_test() {
+#ifdef HW_ENABLE_HW5
+
+    std::cout << "---------hw5 test---------" << std::endl;
+
+    using shstring = typename shmem::types::string<shmem::allocators::LinearAllocator<char>>;
+
+    // ------------------ int->int
+
+    auto shmem_ptr = shmem::create_shmem<std::byte>(memsize::KILOBYTE);
+    shmem::allocators::LinearAllocator<std::byte>
+            shallocator{shmem_ptr.get(), memsize::KILOBYTE};
+
+    shmem::allocators::LinearAllocator<std::pair<const int, int>> pair_allocator{shallocator};
+
+    shmem::containers::Map<int, int, std::less<>, decltype(pair_allocator)>
+            shmap{pair_allocator, true};
+
+    // ------------------ string->string
+
+    auto shmem_ptr1 = shmem::create_shmem<std::byte>(memsize::KILOBYTE);
+    shmem::allocators::LinearAllocator<std::byte>
+            shallocator1{shmem_ptr1.get(), memsize::KILOBYTE};
+
+    shmem::allocators::LinearAllocator<std::pair<const shstring, shstring>> pair_allocator1{shallocator};
+
+    shmem::containers::Map<shstring, shstring, std::less<>, decltype(pair_allocator1)>
+            shmap1{pair_allocator1, true};
+
+    // ------------------ string->int
+
+    auto shmem_ptr2 = shmem::create_shmem<std::byte>(memsize::KILOBYTE);
+    shmem::allocators::LinearAllocator<std::byte>
+            shallocator2{shmem_ptr2.get(), memsize::KILOBYTE};
+
+    shmem::allocators::LinearAllocator<std::pair<const shstring, int>> pair_allocator2{shallocator};
+
+    shmem::containers::Map<shstring, int, std::less<>, decltype(pair_allocator2)>
+            shmap2{pair_allocator2, true};
+
+    // ------------------
+
+    unixprimwrap::Fork child_fork;
+    if (!child_fork.is_valid()) {
+        throw std::runtime_error("hw4: fork failed");
+    }
+
+    constexpr auto int_key = 100500;
+    constexpr auto very_long_string_key = "This is a very long string key for my shared map testing!";
+
+    if (child_fork.is_child()) {
+        shmap.insert(int_key, int_key);
+        shmap1.insert(very_long_string_key, "Yeah!!! It's working!!!");
+        shmap2.insert(very_long_string_key, int_key);
+        return;
+    }
+
+    auto sleep_duration = std::chrono::milliseconds(100); // 100 millisecond
+    std::this_thread::sleep_for(sleep_duration);
+
+    auto value1 = shmap.at(int_key);
+    auto value2 = shmap1.at<std::string>(very_long_string_key);
+    auto value3 = shmap2.at(very_long_string_key);
+
+    shmap.destroy();
+    shmap1.destroy();
+    shmap2.destroy();
+
+    std::cout << value1 << std::endl;
+    std::cout << value2 << std::endl;
+    std::cout << value3 << std::endl;
 
 #endif
 }
