@@ -6,6 +6,7 @@
 namespace trivilog {
 
 namespace {
+
 decltype(auto) now_time() {
     auto now = std::chrono::system_clock::now();
     auto time = std::chrono::system_clock::to_time_t(now);
@@ -14,10 +15,12 @@ decltype(auto) now_time() {
 
 constexpr inline std::string_view trace_level_name = "[TRACE]";
 constexpr inline std::string_view debug_level_name = "[DEBUG]";
-constexpr inline std::string_view info_level_name =  "[INFO ]";
-constexpr inline std::string_view warn_level_name =  "[WARN ]";
+constexpr inline std::string_view info_level_name = "[INFO ]";
+constexpr inline std::string_view warn_level_name = "[WARN ]";
 constexpr inline std::string_view error_level_name = "[ERROR]";
+constexpr inline std::string_view crit_level_name = "[CRIT ]";
 constexpr inline std::string_view fatal_level_name = "[FATAL]";
+
 }
 
 void BaseLogger::trace(std::string_view msg) {
@@ -38,6 +41,10 @@ void BaseLogger::warn(std::string_view msg) {
 
 void BaseLogger::error(std::string_view msg) {
     log(msg, log_level::ERROR);
+}
+
+void BaseLogger::crit(std::string_view msg) {
+    log(msg, log_level::CRIT);
 }
 
 void BaseLogger::fatal(std::string_view msg) {
@@ -77,6 +84,10 @@ void BaseLogger::log(std::string_view msg, log_level level) {
             }
             case log_level::ERROR: {
                 log_to_ostream(error_level_name, msg);
+                break;
+            }
+            case log_level::CRIT: {
+                log_to_ostream(crit_level_name, msg);
                 break;
             }
             case log_level::FATAL: {

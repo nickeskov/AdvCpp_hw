@@ -12,8 +12,6 @@ namespace trivilog {
 class BaseLogger {
   public:
 
-    void fatal(std::string_view msg);
-
     void trace(std::string_view msg);
 
     void debug(std::string_view msg);
@@ -24,6 +22,10 @@ class BaseLogger {
 
     void error(std::string_view msg);
 
+    void crit(std::string_view msg);
+
+    void fatal(std::string_view msg);
+
     void set_level(log_level level) noexcept;
 
     [[nodiscard]] log_level get_level() const noexcept;
@@ -32,14 +34,15 @@ class BaseLogger {
 
     virtual ~BaseLogger() noexcept = default;
 
+  protected:
+    virtual void log_to_ostream(std::string_view log_level_name, std::string_view msg);
+
   private:
     std::atomic<log_level> level_ = log_level::INFO;
 
     [[nodiscard]] virtual std::ostream &get_ostream() = 0;
 
     virtual void log(std::string_view msg, log_level level);
-
-    virtual void log_to_ostream(std::string_view log_level_name, std::string_view msg);
 };
 
 }

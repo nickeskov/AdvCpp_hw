@@ -5,6 +5,7 @@ namespace trivilog {
 
 enum class log_level : unsigned int {
     FATAL = 0,
+    CRIT,
     ERROR,
     WARN,
     INFO,

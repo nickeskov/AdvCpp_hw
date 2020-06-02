@@ -74,7 +74,11 @@ add_library(trivilog STATIC
         src/global_logger.cpp
         src/stderr_buff_logger.cpp
         src/stderr_logger.cpp
-        src/stdout_logger.cpp)
+        src/stdout_logger.cpp
+        src/safe_file_logger.cpp
+        src/safe_stdout_logger.cpp
+        src/safe_stderr_logger.cpp
+        src/safe_stderr_buff_logger.cpp)
 
 target_include_directories(trivilog PUBLIC include)
 

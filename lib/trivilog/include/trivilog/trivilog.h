@@ -11,6 +11,10 @@
 #include "trivilog/stderr_logger.h"
 #include "trivilog/stderr_buff_logger.h"
 #include "trivilog/file_logger.h"
+#include "trivilog/safe_file_logger.h"
+#include "trivilog/safe_stdout_logger.h"
+#include "trivilog/safe_stderr_logger.h"
+#include "trivilog/safe_stderr_buff_logger.h"
 #include "trivilog/global_logger.h"
 
 namespace trivilog {
