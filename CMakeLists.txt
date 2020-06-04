@@ -120,5 +120,7 @@ endif ()
 
 if (HW_ENABLE_ALL OR HW_ENABLE_HW6)
     add_subdirectory(lib/coroutine)
+    add_subdirectory(lib/tinyhttp)
+    target_link_libraries(hw tinyhttp)
     target_compile_definitions(hw PRIVATE HW_ENABLE_HW6)
 endif ()
