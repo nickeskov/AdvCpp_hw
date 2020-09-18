@@ -17,7 +17,7 @@ std::string to_lower(std::string_view view) {
     lowercase_string.reserve(view.size());
 
     for (const unsigned char c : view) {
-        lowercase_string += std::tolower(c);
+        lowercase_string += static_cast<char>(std::tolower(c));
     }
 
     return lowercase_string;

@@ -7,7 +7,7 @@ namespace tinyhttp {
 
 using namespace tinyhttp::constants;
 
-// cppcheck-suppress passedByValue; passing by value and move
+// cppcheck-suppress passedByValue ; passing by value and move
 HttpRequest::HttpRequest(HttpRequestLine request_line, HttpHeaders headers)
         : request_line_(std::move(request_line)), headers_(std::move(headers)) {
     if (headers_.contains(headers::content_length)) {

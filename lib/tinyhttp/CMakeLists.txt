@@ -78,10 +78,11 @@ add_library(tinyhttp STATIC
         src/http_query_parameters.cpp
         src/epoll_worker.cpp
         src/http_request_line.cpp
-        src/http_response_line.cpp)
+        src/http_response_line.cpp
+        src/connection.cpp)
 
 target_include_directories(tinyhttp PUBLIC include)
 
-target_link_libraries(tinyhttp coroutine)
+target_link_libraries(tinyhttp coroutine unixprimwrap)
 
 target_compile_options(tinyhttp PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)

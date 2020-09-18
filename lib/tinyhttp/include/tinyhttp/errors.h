@@ -57,6 +57,66 @@ class HttpNotImplemented : public HttpStandardError {
 
 };
 
+class IoError : public RuntimeError {
+  public:
+    explicit IoError(std::string_view what_arg);
+};
+
+class ClosedEndpointError : public IoError {
+  public:
+    explicit ClosedEndpointError(std::string_view what_arg);
+};
+
+class WriteError : public IoError {
+  public:
+    explicit WriteError(std::string_view what_arg);
+};
+
+class ReadError : public IoError {
+  public:
+    explicit ReadError(std::string_view what_arg);
+};
+
+class EofError : public ReadError {
+  public:
+    explicit EofError(std::string_view what_arg);
+};
+
+class TcpError : public IoError {
+  public:
+    explicit TcpError(std::string_view what_arg);
+};
+
+class ConnectionError : public RuntimeError {
+  public:
+    explicit ConnectionError(std::string_view what_arg);
+};
+
+class IoServiceError : public ConnectionError {
+  public:
+    explicit IoServiceError(std::string_view what_arg);
+};
+
+class TimeoutSetError : public IoServiceError {
+  public:
+    explicit TimeoutSetError(std::string_view what_arg);
+};
+
+class ConnOpenError : public ConnectionError {
+  public:
+    explicit ConnOpenError(std::string_view what_arg);
+};
+
+class ConnCloseError : public ConnectionError {
+  public:
+    explicit ConnCloseError(std::string_view what_arg);
+};
+
+class InvalidAddressError : public ConnOpenError {
+  public:
+    explicit InvalidAddressError(std::string_view what_arg);
+};
+
 }
 
 #endif //TINYHTTP_TINYHTTP_ERRORS_H

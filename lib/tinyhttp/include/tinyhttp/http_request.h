@@ -9,6 +9,7 @@
 
 namespace tinyhttp {
 
+// TODO(nickeskov): create method for set body into request object
 class HttpRequest {
   public:
 
