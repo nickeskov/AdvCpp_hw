@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <iomanip>
+#include <ctime>
 
 namespace trivilog {
 
@@ -10,7 +11,7 @@ namespace {
 decltype(auto) now_time() {
     auto now = std::chrono::system_clock::now();
     auto time = std::chrono::system_clock::to_time_t(now);
-    return std::put_time(std::localtime(&time), "%Y-%m-%d %T");
+    return std::put_time(std::gmtime(&time), "%Y-%m-%d %T");
 }
 
 constexpr inline std::string_view trace_level_name = "[TRACE]";
