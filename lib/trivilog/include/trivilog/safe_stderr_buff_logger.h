@@ -10,6 +10,8 @@ namespace trivilog {
 class SafeStderrBuffLogger : public StderrBuffLogger {
   public:
 
+    SafeStderrBuffLogger() = default;
+
     SafeStderrBuffLogger(const SafeStderrBuffLogger &) = delete;
 
     SafeStderrBuffLogger &operator=(const SafeStderrBuffLogger &) = delete;
