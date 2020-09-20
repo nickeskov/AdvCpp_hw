@@ -11,7 +11,7 @@ using routine_t = size_t;
 using stack_t = std::unique_ptr<uint8_t[]>;
 using routine_function_t = std::function<void()>;
 
-enum class resume_statuses {
+enum class coroutine_status {
     NONE = 0,
     ERROR,
     AGAIN,
@@ -20,7 +20,7 @@ enum class resume_statuses {
 
 routine_t create(routine_t id, const routine_function_t &function);
 
-resume_statuses resume(routine_t id);
+coroutine_status resume(routine_t id);
 
 void kill(routine_t id, const std::exception_ptr &ptr);
 

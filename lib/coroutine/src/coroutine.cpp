@@ -79,22 +79,22 @@ routine_t create(routine_t id, const routine_function_t &function) {
     }
 }
 
-resume_statuses resume(routine_t id) {
+coroutine_status resume(routine_t id) {
     if (id == 0) {
-        return resume_statuses::NONE;
+        return coroutine_status::NONE;
     }
 
     auto &o = ordinator;
 
     const auto &routine_ref = o.routines.at(id);
     if (routine_ref.finished) {
-        return resume_statuses::NONE;
+        return coroutine_status::NONE;
     }
 
     o.current = id;
     if (swapcontext(&o.ctx, &routine_ref.ctx) < 0) {
         o.current = 0;
-        return resume_statuses::ERROR;
+        return coroutine_status::ERROR;
     }
 
     if (routine_ref.finished) {
@@ -110,10 +110,10 @@ resume_statuses resume(routine_t id) {
             std::rethrow_exception(exception_ptr);
         }
 
-        return resume_statuses::FINISHED;
+        return coroutine_status::FINISHED;
     }
 
-    return resume_statuses::AGAIN;
+    return coroutine_status::AGAIN;
 }
 
 void kill(routine_t id, const std::exception_ptr &ptr) {
@@ -178,7 +178,7 @@ void entry() {
     routine_t id = o.current;
     auto &routine_ref = o.routines.at(id);
 
-    if (routine_ref.func) {
+    if (routine_ref.func && !routine_ref.exception) {
         try {
             routine_ref.func();
         } catch (...) {
