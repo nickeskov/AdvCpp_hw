@@ -10,7 +10,7 @@ extern "C" {
 #include <ucontext.h>
 }
 
-namespace Coroutine {
+namespace coroutine {
 
 class Routine;
 
@@ -79,22 +79,22 @@ routine_t create(routine_t id, const routine_function_t &function) {
     }
 }
 
-bool resume(routine_t id) {
+resume_statuses resume(routine_t id) {
     if (id == 0) {
-        return false;
+        return resume_statuses::NONE;
     }
 
     auto &o = ordinator;
 
     const auto &routine_ref = o.routines.at(id);
     if (routine_ref.finished) {
-        throw std::logic_error("finished routine in map of active routines");
+        return resume_statuses::NONE;
     }
 
     o.current = id;
     if (swapcontext(&o.ctx, &routine_ref.ctx) < 0) {
         o.current = 0;
-        return false;
+        return resume_statuses::ERROR;
     }
 
     if (routine_ref.finished) {
@@ -109,9 +109,11 @@ bool resume(routine_t id) {
         if (exception_ptr) {
             std::rethrow_exception(exception_ptr);
         }
+
+        return resume_statuses::FINISHED;
     }
 
-    return true;
+    return resume_statuses::AGAIN;
 }
 
 void kill(routine_t id, const std::exception_ptr &ptr) {
