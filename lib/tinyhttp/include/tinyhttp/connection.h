@@ -75,6 +75,8 @@ class Connection {
 
     std::string io_buffer_;
 
+    std::string tmp_read_buffer_;
+
     friend class Server;
     friend class EpollWorker;
 

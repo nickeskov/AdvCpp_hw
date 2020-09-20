@@ -74,4 +74,29 @@ ConnCloseError::ConnCloseError(std::string_view what_arg)
 
 InvalidAddressError::InvalidAddressError(std::string_view what_arg)
         : ConnOpenError(what_arg) {}
+
+ServerError::ServerError(std::string_view what_arg) : RuntimeError(what_arg) {}
+
+EpollError::EpollError(std::string_view what_arg) : ServerError(what_arg) {}
+
+EpollCreateError::EpollCreateError(std::string_view what_arg) : EpollError(what_arg) {}
+
+EpollWaitError::EpollWaitError(std::string_view what_arg) : EpollError(what_arg) {}
+
+EpollCtlError::EpollCtlError(std::string_view what_arg) : EpollError(what_arg) {}
+
+EpollAddError::EpollAddError(std::string_view what_arg) : EpollCtlError(what_arg) {}
+
+EpollModError::EpollModError(std::string_view what_arg) : EpollCtlError(what_arg) {}
+
+EpollDelError::EpollDelError(std::string_view what_arg) : EpollCtlError(what_arg) {}
+
+AcceptError::AcceptError(std::string_view what_arg) : ServerError(what_arg) {}
+
+BindError::BindError(std::string_view what_arg) : ServerError(what_arg) {}
+
+ListenError::ListenError(std::string_view what_arg) : ServerError(what_arg) {}
+
+ServerCloseError::ServerCloseError(std::string_view what_arg) : ServerError(what_arg) {}
+
 }

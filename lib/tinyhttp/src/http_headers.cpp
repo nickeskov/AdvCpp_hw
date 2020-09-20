@@ -15,12 +15,13 @@ HttpHeaders::HttpHeaders(std::string_view headers_values_view) {
 
     reserve(headers_count);
 
-    size_t next;
+    for (size_t next = headers_values_view.find(constants::strings::newline);
+         next != std::string_view::npos;
+         next = headers_values_view.find(constants::strings::newline)) {
 
-    while ((next = headers_values_view.find(constants::strings::newline)) != std::string_view::npos) {
         const std::string_view header_value_view = headers_values_view.substr(0, next);
         if (header_value_view.empty()) {
-            break; // if we get "\r\n\r\n"
+            break; // if we get "\r\n"
         }
 
         size_t colon_pos = header_value_view.find(constants::strings::colon);

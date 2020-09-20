@@ -79,10 +79,12 @@ add_library(tinyhttp STATIC
         src/epoll_worker.cpp
         src/http_request_line.cpp
         src/http_response_line.cpp
-        src/connection.cpp)
+        src/connection.cpp src/server.cpp)
 
 target_include_directories(tinyhttp PUBLIC include)
 
-target_link_libraries(tinyhttp coroutine unixprimwrap)
+find_package(Threads REQUIRED)
+
+target_link_libraries(tinyhttp coroutine unixprimwrap trivilog ${CMAKE_THREAD_LIBS_INIT})
 
 target_compile_options(tinyhttp PRIVATE -Wall -Wextra -Wpedantic -Werror -pipe)

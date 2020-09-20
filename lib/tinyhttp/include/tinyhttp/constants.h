@@ -6,7 +6,7 @@
 namespace tinyhttp::constants::strings {
 
 constexpr std::string_view newline = std::string_view("\r\n");
-constexpr std::string_view body_separator = std::string_view("\r\n\r\n");
+constexpr std::string_view headers_end = std::string_view("\r\n\r\n");
 constexpr std::string_view colon = std::string_view(":");
 constexpr std::string_view space = std::string_view(" ");
 constexpr std::string_view question = std::string_view("?");

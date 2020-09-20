@@ -234,16 +234,17 @@ const std::string &Connection::get_io_buffer() const noexcept {
 }
 
 ssize_t Connection::read_in_io_buff(size_t len) {
-    std::string tmp_buff;
-    tmp_buff.resize(len);
+    tmp_read_buffer_.clear();
+    tmp_read_buffer_.resize(len);
 
-    ssize_t bytes_read = read(tmp_buff.data(), len);
+    ssize_t bytes_read = read(tmp_read_buffer_.data(), len);
     if (bytes_read <= 0) {
         return bytes_read;
     }
 
-    tmp_buff.resize(bytes_read);
-    io_buffer_ += tmp_buff;
+    tmp_read_buffer_.resize(bytes_read);
+    io_buffer_ += tmp_read_buffer_;
+
     return bytes_read;
 }
 

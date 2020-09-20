@@ -117,6 +117,66 @@ class InvalidAddressError : public ConnOpenError {
     explicit InvalidAddressError(std::string_view what_arg);
 };
 
+class ServerError : public RuntimeError {
+  public:
+    explicit ServerError(std::string_view what_arg);
+};
+
+class BindError : public ServerError {
+  public:
+    explicit BindError(std::string_view what_arg);
+};
+
+class ListenError : public ServerError {
+  public:
+    explicit ListenError(std::string_view what_arg);
+};
+
+class AcceptError : public ServerError {
+  public:
+    explicit AcceptError(std::string_view what_arg);
+};
+
+class ServerCloseError : public ServerError {
+  public:
+    explicit ServerCloseError(std::string_view what_arg);
+};
+
+class EpollError : public ServerError {
+  public:
+    explicit EpollError(std::string_view what_arg);
+};
+
+class EpollCreateError : public EpollError {
+  public:
+    explicit EpollCreateError(std::string_view what_arg);
+};
+
+class EpollWaitError : public EpollError {
+  public:
+    explicit EpollWaitError(std::string_view what_arg);
+};
+
+class EpollCtlError : public EpollError {
+  public:
+    explicit EpollCtlError(std::string_view what_arg);
+};
+
+class EpollAddError : public EpollCtlError {
+  public:
+    explicit EpollAddError(std::string_view what_arg);
+};
+
+class EpollModError : public EpollCtlError {
+  public:
+    explicit EpollModError(std::string_view what_arg);
+};
+
+class EpollDelError : public EpollCtlError {
+  public:
+    explicit EpollDelError(std::string_view what_arg);
+};
+
 }
 
 #endif //TINYHTTP_TINYHTTP_ERRORS_H

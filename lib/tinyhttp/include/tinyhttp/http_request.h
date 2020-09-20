@@ -13,7 +13,7 @@ namespace tinyhttp {
 class HttpRequest {
   public:
 
-    HttpRequest(HttpRequestLine request_line, HttpHeaders headers);
+    HttpRequest(HttpRequestLine request_line, HttpHeaders headers, std::string_view body);
 
     HttpRequestLine &get_request_line() noexcept;
 
@@ -34,9 +34,9 @@ class HttpRequest {
   private:
     HttpRequestLine request_line_;
     HttpHeaders headers_;
-    size_t content_length_{};
-
     std::string body_;
+
+    size_t content_length_{};
 };
 
 }

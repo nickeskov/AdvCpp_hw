@@ -30,7 +30,7 @@ HttpRequestLine::HttpRequestLine(std::string_view request_line) {
 
     auto question_pos = url_.find(constants::strings::question);
     if (question_pos != std::string::npos
-        && question_pos + space_pos + constants::strings::question.size() < url_.size()) {
+        && question_pos  + constants::strings::question.size() < url_.size()) {
         std::string_view query_string_view = url_;
         query_string_view = query_string_view.substr(
                 question_pos + constants::strings::question.size());

@@ -8,12 +8,9 @@ namespace tinyhttp {
 using namespace tinyhttp::constants;
 
 // cppcheck-suppress passedByValue ; passing by value and move
-HttpRequest::HttpRequest(HttpRequestLine request_line, HttpHeaders headers)
-        : request_line_(std::move(request_line)), headers_(std::move(headers)) {
-    if (headers_.contains(headers::content_length)) {
-        content_length_ = std::stoul(headers_.at(headers::content_length));
-    }
-}
+HttpRequest::HttpRequest(HttpRequestLine request_line, HttpHeaders headers, std::string_view body)
+        : request_line_(std::move(request_line)), headers_(std::move(headers)), body_(body),
+          content_length_(body.size()) {}
 
 HttpRequestLine &HttpRequest::get_request_line() noexcept {
     return request_line_;
@@ -34,7 +31,6 @@ const HttpHeaders &HttpRequest::get_headers() const noexcept {
 std::string &HttpRequest::get_body() noexcept {
     return body_;
 }
-
 
 const std::string &HttpRequest::get_body() const noexcept {
     return body_;
