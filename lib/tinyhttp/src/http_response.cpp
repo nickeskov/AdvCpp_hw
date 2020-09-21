@@ -1,6 +1,8 @@
 #include "tinyhttp/http_response.h"
 #include "tinyhttp/utils.h"
 
+#include <utility>
+
 namespace tinyhttp {
 
 HttpResponse::HttpResponse() {
@@ -33,6 +35,11 @@ const HttpHeaders &HttpResponse::get_headers() const noexcept {
     return headers_;
 }
 
+void HttpResponse::reset_headers() {
+    headers_.clear();
+    set_basic_headers();
+}
+
 void HttpResponse::set_headers(const HttpHeaders &headers) {
     headers_ = headers;
 }
@@ -58,6 +65,10 @@ const HttpResponse::response_sender_t &HttpResponse::get_sender() const noexcept
 
 void HttpResponse::set_sender(const HttpResponse::response_sender_t &sender) {
     sender_ = sender;
+}
+
+void HttpResponse::set_sender(HttpResponse::response_sender_t &&sender) {
+    sender_ = std::move(sender);
 }
 
 std::string HttpResponse::to_string() const {

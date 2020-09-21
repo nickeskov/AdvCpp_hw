@@ -4,6 +4,8 @@
 
 #include <cerrno>
 #include <cstring>
+#include <version>
+#include <thread>
 
 extern "C" {
 #include <sys/socket.h>
@@ -17,8 +19,7 @@ namespace tinyhttp {
 using namespace std::literals::string_literals;
 
 Server::Server(std::string_view ip, uint16_t port, trivilog::BaseLogger &logger)
-        : server_sock_fd_(socket(PF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP))
-        ,logger_(logger) {
+        : server_sock_fd_(socket(PF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP)), logger_(logger) {
 
     int yes = 1;
     int reuseaddr_status = setsockopt(server_sock_fd_.data(),
@@ -112,11 +113,22 @@ void Server::close() {
     }
 }
 
-void Server::run(size_t thread_counts) {
-    EpollWorker::EventLoopConfig config;
+void Server::run(Server::EventLoopConfig config, size_t thread_counts) {
+    std::vector<std::thread> workers(thread_counts - 1);
 
-    // TODO(nickeskov): default hardcoded event loop config and unused thread_counts
-    EpollWorker(thread_counts, *this).event_loop(config);
+    size_t id = 0;
+
+    for (; id < workers.size(); ++id) {
+        workers[id] = std::thread([id, this](const  Server::EventLoopConfig &cfg) {
+            EpollWorker(id, *this).event_loop(cfg);
+        }, std::ref(config));
+    }
+
+    EpollWorker(id, *this).event_loop(config);
+
+    for (auto &worker : workers) {
+        worker.join();
+    }
 }
 
 }

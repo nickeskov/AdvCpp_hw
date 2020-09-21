@@ -3,8 +3,8 @@
 #include <exception>
 #include <iostream>
 
-//#include "tinyhttp/server.h"
-//#include "trivilog/safe_stdout_logger.h"
+#include "tinyhttp/basic_static_server.h"
+#include "trivilog/safe_stdout_logger.h"
 
 int main() {
     try {
@@ -19,11 +19,13 @@ int main() {
         return 1;
     }
 
-//    std::cout << "---------------------------" << std::endl;
+    std::cout << "---------------------------" << std::endl;
+
+//    trivilog::SafeStdoutLogger logger_;
 //
-//    trivilog::StdoutLogger logger_;
-//
-//    tinyhttp::Server("127.0.0.1", 8000, logger_).run(1);
+//    tinyhttp::BasicStaticServer("127.0.0.1", 8000, logger_,
+//                                "/home/administrator/tmp"
+//    ).run(tinyhttp::Server::EventLoopConfig());
 
     return 0;
 }

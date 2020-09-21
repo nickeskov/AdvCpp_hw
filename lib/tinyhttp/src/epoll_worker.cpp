@@ -37,8 +37,8 @@ int epoll_mod(int epoll_fd, int fd, uint32_t new_events);
 
 constexpr uint32_t ACCEPTOR_EVENTS = EPOLLIN | EPOLLEXCLUSIVE;
 constexpr size_t MAX_ACCEPTIONS_PER_LOOP = 1;
-constexpr size_t MAX_READ_BYTES_PER_CALL = 8;
-constexpr size_t MAX_WRITE_BYTES_PER_CALL = 8;
+constexpr size_t MAX_READ_BYTES_PER_CALL = 2048;
+constexpr size_t MAX_WRITE_BYTES_PER_CALL = 2048;
 
 std::string_view read_body(Connection &connection, size_t start_pos, ssize_t body_len);
 
@@ -46,12 +46,12 @@ size_t read_until_headers_end(Connection &connection);
 
 HttpRequest read_http_request(Connection &connection);
 
-void send_http_response(Connection &connection, HttpResponse &response);
+void send_http_response(Connection &connection, const HttpResponse &response);
 
 }
 
 
-EpollWorker::EpollWorker(int worker_id, const Server &server)
+EpollWorker::EpollWorker(int worker_id, Server &server)
         : worker_id_(worker_id), server_(server), logger_(server.get_logger()), epoll_fd_(epoll_create(1)) {
 
     if (!epoll_fd_.is_valid()) {
@@ -176,7 +176,7 @@ void EpollWorker::accept_connections(size_t max_count) {
     }
 }
 
-void EpollWorker::event_loop(const EventLoopConfig &cfg) {
+void EpollWorker::event_loop(const Server::EventLoopConfig &cfg) {
     std::vector<struct epoll_event> fd_events(cfg.epoll_max_events);
 
     const int basic_acceptor_service = server_.get_acceptor_service().data();
@@ -208,7 +208,7 @@ void EpollWorker::event_loop(const EventLoopConfig &cfg) {
     }
 }
 
-void EpollWorker::operator()(const EpollWorker::EventLoopConfig &cfg) {
+void EpollWorker::operator()(const Server::EventLoopConfig &cfg) {
     event_loop(cfg);
 }
 
@@ -229,10 +229,9 @@ void EpollWorker::handle_client(epoll_event fd_event) {
     coroutine::coroutine_status status = coroutine::coroutine_status::NONE;
     try {
         status = coroutine::resume(client_conn_io_service);
-    } catch (errors::EofError &) {
-        logger_.info("[worker " + std::to_string(worker_id_) + "] "
-                                                               "Eof Error on io_service=" +
-                     std::to_string(client_conn_io_service));
+    } catch (const errors::IoError &e) {
+        logger_.info("[worker " + std::to_string(worker_id_) + "] " + e.what()
+                     + " : " + std::strerror(e.errno_code()));
         // TODO(nickeckov): ignored, need handle all exception types
     }
 
@@ -253,13 +252,7 @@ void EpollWorker::client_routine() {
 
         change_event(client, EPOLLOUT);
 
-
-        HttpResponse response(constants::http_response_status::OK,
-                              request.get_request_line().get_version());
-
-        {
-            response.append_to_body("Hello World!\n\r\n\r");
-        }
+        HttpResponse response = server_.on_request(request);
 
         if (response.get_sender()) {
             auto &sender = response.get_sender();
@@ -387,7 +380,7 @@ HttpRequest read_http_request(Connection &connection) {
     return request;
 }
 
-void send_http_response(Connection &connection, HttpResponse &response) {
+void send_http_response(Connection &connection, const HttpResponse &response) {
     connection.get_io_buffer().clear();
 
     connection.get_io_buffer() += response.to_string();

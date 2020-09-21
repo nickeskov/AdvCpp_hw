@@ -8,11 +8,29 @@
 
 #include "unixprimwrap/descriptor.h"
 #include "trivilog/base_logger.h"
+#include "tinyhttp/http_request.h"
+#include "tinyhttp/http_response.h"
+
+extern "C" {
+#include <sys/epoll.h>
+}
 
 namespace tinyhttp {
 
 class Server {
   public:
+
+    // This is event loop configuration structure, for epoll and other stuff
+    struct EventLoopConfig {
+        // cppcheck-suppress unusedStructMember
+        int epoll_max_events = 4096;
+        // cppcheck-suppress unusedStructMember
+        uint32_t epoll_accept_flags = EPOLLIN;
+        // cppcheck-suppress unusedStructMember
+        sigset_t *epoll_sigmask = nullptr;
+        // cppcheck-suppress unusedStructMember
+        int epoll_timeout = -1;
+    };
 
     Server(std::string_view ip, uint16_t port, trivilog::BaseLogger &logger);
 
@@ -24,7 +42,8 @@ class Server {
     //Server(Server &&) noexcept;
     //Server &operator=(Server &&) noexcept;
 
-    void run(size_t thread_counts = std::thread::hardware_concurrency() - 1);
+    void run(EventLoopConfig config,
+             size_t thread_counts = std::thread::hardware_concurrency() - 1);
 
     // TODO(nickeskov): create on_request method for Server
 
@@ -43,6 +62,8 @@ class Server {
     void stop() noexcept;
 
     void close();
+
+    virtual HttpResponse on_request(const HttpRequest &request) = 0;
 
     virtual ~Server() noexcept = default;
 

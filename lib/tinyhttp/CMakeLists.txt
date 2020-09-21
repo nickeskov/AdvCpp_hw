@@ -79,7 +79,9 @@ add_library(tinyhttp STATIC
         src/epoll_worker.cpp
         src/http_request_line.cpp
         src/http_response_line.cpp
-        src/connection.cpp src/server.cpp src/constants.cpp)
+        src/connection.cpp src/server.cpp
+        src/constants.cpp
+        src/basic_static_server.cpp)
 
 target_include_directories(tinyhttp PUBLIC include)
 

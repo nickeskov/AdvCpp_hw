@@ -29,6 +29,8 @@ class HttpResponse {
 
     const HttpHeaders &get_headers() const noexcept;
 
+    void reset_headers();
+
     void set_headers(const HttpHeaders &headers);
 
     const std::string &get_body() const noexcept;
@@ -40,6 +42,8 @@ class HttpResponse {
     const response_sender_t &get_sender() const noexcept;
 
     void set_sender(const response_sender_t &sender);
+
+    void set_sender(response_sender_t &&sender);
 
     std::string to_string() const;
 
