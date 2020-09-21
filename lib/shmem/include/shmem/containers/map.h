@@ -208,7 +208,7 @@ class Map {
 
         auto node_key = get_obj_copy<key_type, NewKey, allocator_type>(key);
 
-        return map_ptr_->find(key) != map_ptr_->cend();
+        return map_ptr_->find(node_key) != map_ptr_->cend();
     }
 
     void destroy() noexcept {

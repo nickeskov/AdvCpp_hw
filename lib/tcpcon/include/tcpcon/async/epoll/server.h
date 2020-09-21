@@ -40,7 +40,7 @@ class Server {
 
     bool add_to_event_loop(Connection &&connection, uint32_t events);
 
-    bool remove_from_event_loop(Connection &connection);
+    bool remove_from_event_loop(int connection_io_service);
 
     bool change_event(const Connection &connection, uint32_t epoll_events);
 
