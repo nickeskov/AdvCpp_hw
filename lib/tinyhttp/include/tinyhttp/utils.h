@@ -12,6 +12,10 @@ std::string decode_url(std::string_view url_view);
 
 int set_nonblock(int fd, bool opt);
 
+std::string now_time_to_str_gmt(const char *fmt);
+
+std::string get_date_http_str();
+
 }
 
 #endif //TINYHTTP_TINYHTTP_UTILS_H

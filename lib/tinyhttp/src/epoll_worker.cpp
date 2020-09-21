@@ -5,12 +5,15 @@
 #include "tinyhttp/http_request_line.h"
 #include "tinyhttp/http_headers.h"
 #include "tinyhttp/http_request.h"
+#include "tinyhttp/http_response.h"
+
 #include "coroutine/coroutine.h"
 
 #include <string>
 #include <vector>
 #include <cerrno>
 #include <cstring>
+#include <exception>
 
 extern "C" {
 #include <sys/socket.h>
@@ -30,19 +33,20 @@ int epoll_add(int epoll_fd, int fd, uint32_t events);
 
 int epoll_mod(int epoll_fd, int fd, uint32_t new_events);
 
-//int epoll_del(int epoll_fd, int fd) {
-//    return epoll_act(epoll_fd, EPOLL_CTL_DEL, fd, 0);
-//}
+//int epoll_del(int epoll_fd, int fd);
 
 constexpr uint32_t ACCEPTOR_EVENTS = EPOLLIN | EPOLLEXCLUSIVE;
 constexpr size_t MAX_ACCEPTIONS_PER_LOOP = 1;
-constexpr size_t MAX_READ_BYTES_PER_CALL = 512;
+constexpr size_t MAX_READ_BYTES_PER_CALL = 8;
+constexpr size_t MAX_WRITE_BYTES_PER_CALL = 8;
 
 std::string_view read_body(Connection &connection, size_t start_pos, ssize_t body_len);
 
 size_t read_until_headers_end(Connection &connection);
 
 HttpRequest read_http_request(Connection &connection);
+
+void send_http_response(Connection &connection, HttpResponse &response);
 
 }
 
@@ -107,7 +111,8 @@ void EpollWorker::close_connection(EpollWorker::basic_io_service_t basic_io_serv
     const auto dst_port = client.connection.dst_port_;
 
     clients_.erase(basic_io_service);
-    logger_.info("Disconnect with "s + dst_addr + ":" + std::to_string(dst_port)
+    logger_.info("[worker " + std::to_string(worker_id_) + "] " +
+                 "Disconnect with " + dst_addr + ":" + std::to_string(dst_port)
                  + " [io_service=" + std::to_string(basic_io_service) + "]");
 }
 
@@ -164,7 +169,8 @@ void EpollWorker::accept_connections(size_t max_count) {
 
         coroutine::create(client_conn_io_service, &EpollWorker::client_routine, this);
 
-        logger_.info("Accepted new connection from "s + client_dst_addr + ":" +
+        logger_.info("[worker " + std::to_string(worker_id_) + "] " +
+                     "Accepted new connection from " + client_dst_addr + ":" +
                      std::to_string(client_dst_port) +
                      +" [io_service=" + std::to_string(client_conn_io_service) + "]");
     }
@@ -195,8 +201,6 @@ void EpollWorker::event_loop(const EventLoopConfig &cfg) {
 
             if (fd_event.data.fd == basic_acceptor_service) {
                 accept_connections(MAX_ACCEPTIONS_PER_LOOP);
-            } else if (fd_event.events & EPOLLHUP || fd_event.events & EPOLLERR) {
-                close_connection(fd_event.data.fd);
             } else {
                 handle_client(fd_event);
             }
@@ -212,19 +216,27 @@ void EpollWorker::handle_client(epoll_event fd_event) {
     const auto client_conn_io_service = fd_event.data.fd;
 
     if (fd_event.events & EPOLLHUP || fd_event.events & EPOLLERR) {
+        try {
+            auto killer_exception = std::make_exception_ptr(errors::EpollError("epollhup err"));
+            coroutine::kill(client_conn_io_service, killer_exception);
+        } catch (errors::EpollError &) {
+            // ignored
+        }
         close_connection(client_conn_io_service);
+        return;
     }
 
-//    Client &client = clients_.at(client_conn_io_service);
-
-    coroutine::resume_statuses status;
+    coroutine::coroutine_status status = coroutine::coroutine_status::NONE;
     try {
         status = coroutine::resume(client_conn_io_service);
-    } catch (...) {
-        // TODO(nickeckov): ignored
+    } catch (errors::EofError &) {
+        logger_.info("[worker " + std::to_string(worker_id_) + "] "
+                                                               "Eof Error on io_service=" +
+                     std::to_string(client_conn_io_service));
+        // TODO(nickeckov): ignored, need handle all exception types
     }
 
-    if (status == coroutine::resume_statuses::FINISHED) {
+    if (status != coroutine::coroutine_status::AGAIN) {
         close_connection(client_conn_io_service);
     }
 }
@@ -239,15 +251,27 @@ void EpollWorker::client_routine() {
     while (true) {
         HttpRequest request = read_http_request(connection);
 
-        connection.get_io_buffer().clear();
+        change_event(client, EPOLLOUT);
 
-        connection.get_io_buffer() += request.get_body();
 
-        connection.write_from_io_buff(request.get_body().size());
+        HttpResponse response(constants::http_response_status::OK,
+                              request.get_request_line().get_version());
 
-        // TODO(nickeskov): create http response
+        {
+            response.append_to_body("Hello World!\n\r\n\r");
+        }
 
-        // TODO(nickeskov): process client request and send response cycle
+        if (response.get_sender()) {
+            auto &sender = response.get_sender();
+
+            sender(connection, response);
+
+            connection.get_io_buffer().clear();
+        } else {
+            send_http_response(connection, response);
+        }
+
+        // TODO(nickeskov): need implement keepalive connection type
         break;
     }
 }
@@ -269,6 +293,10 @@ int epoll_mod(int epoll_fd, int fd, uint32_t new_events) {
     return epoll_act(epoll_fd, EPOLL_CTL_MOD, fd, new_events);
 }
 
+//int epoll_del(int epoll_fd, int fd) {
+//    return epoll_act(epoll_fd, EPOLL_CTL_DEL, fd, 0);
+//}
+
 std::string_view read_body(Connection &connection, size_t start_pos, ssize_t body_len) {
     if (body_len > 0) {
         auto &buffer = connection.get_io_buffer();
@@ -286,7 +314,7 @@ std::string_view read_body(Connection &connection, size_t start_pos, ssize_t bod
 
             was_read += bytes;
 
-            coroutine::yield();
+            coroutine::yield(); // nickeskov: using level triggered mode
         }
 
         return std::string_view(buffer).substr(start_pos, body_len);
@@ -307,8 +335,11 @@ size_t read_until_headers_end(Connection &connection) {
         }
 
         ssize_t bytes = connection.read_in_io_buff(MAX_READ_BYTES_PER_CALL);
-        if (bytes < 0) {
-            coroutine::yield();
+        if (bytes <= 0) {
+            if (bytes == 0) {
+                throw errors::EofError("connection closed");
+            }
+            coroutine::yield(); // TODO(nickeskov): 0 means connection closed!
             continue;
         }
 
@@ -317,13 +348,15 @@ size_t read_until_headers_end(Connection &connection) {
             break;
         }
 
-        coroutine::yield();
+        coroutine::yield(); // nickeskov: using level triggered mode
     }
 
     return headers_end_pos;
 }
 
 HttpRequest read_http_request(Connection &connection) {
+    connection.get_io_buffer().clear();
+
     size_t headers_end_pos = read_until_headers_end(connection);
 
     std::string_view buff = connection.get_io_buffer();
@@ -347,7 +380,34 @@ HttpRequest read_http_request(Connection &connection) {
         body = read_body(connection, start_pos, body_len);
     }
 
-    return HttpRequest(std::move(request_line), std::move(headers), body);
+    auto request = HttpRequest(std::move(request_line), std::move(headers), body);
+
+    connection.get_io_buffer().clear();
+
+    return request;
+}
+
+void send_http_response(Connection &connection, HttpResponse &response) {
+    connection.get_io_buffer().clear();
+
+    connection.get_io_buffer() += response.to_string();
+
+    auto write_size = connection.get_io_buffer().size();
+
+    for (size_t written = 0; written < write_size;) {
+        auto bytes = connection.write_from_io_buff(MAX_WRITE_BYTES_PER_CALL);
+
+        if (bytes < 0) {
+            coroutine::yield();
+            continue;
+        }
+
+        written += bytes;
+
+        coroutine::yield(); // nickeskov: using level triggered mode
+    }
+
+    connection.get_io_buffer().clear();
 }
 
 }

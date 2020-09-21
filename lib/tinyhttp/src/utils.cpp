@@ -4,10 +4,20 @@
 #include <cctype>
 #include <cstdlib>
 #include <algorithm>
+#include <chrono>
+#include <iomanip>
+#include <ctime>
+#include <sstream>
 
 extern "C" {
 #include <fcntl.h>
 #include <sys/ioctl.h>
+}
+
+namespace {
+
+const char *const en_us_locale_name = "en_US.UTF8";
+
 }
 
 namespace tinyhttp::utils {
@@ -83,6 +93,24 @@ int set_nonblock(int fd, bool opt) {
     }
     return ioctl(fd, FIOBIO, &flags);
 #endif
+}
+
+std::string now_time_to_str_gmt(const char *fmt) {
+    auto now = std::chrono::system_clock::now();
+    auto time = std::chrono::system_clock::to_time_t(now);
+
+    std::stringstream ss;
+    ss.imbue(std::locale(en_us_locale_name));
+
+    ss << std::put_time(std::gmtime(&time), fmt);
+
+    return ss.str();
+
+}
+
+std::string get_date_http_str() {
+    // RFC 7231, 7.1.1.2: Date
+    return now_time_to_str_gmt("%a, %d %b %Y %T %Z");
 }
 
 }

@@ -5,6 +5,7 @@
 #include <string_view>
 
 #include "tinyhttp/http_query_parameters.h"
+#include "tinyhttp/constants.h"
 
 namespace tinyhttp {
 
@@ -12,9 +13,9 @@ class HttpRequestLine {
   public:
     explicit HttpRequestLine(std::string_view request_line);
 
-    const std::string &get_version() const;
+    constants::http_version get_version() const;
 
-    const std::string &get_method() const;
+    constants::http_method get_method() const;
 
     const std::string &get_url() const;
 
@@ -23,8 +24,8 @@ class HttpRequestLine {
     std::string to_string() const;
 
   private:
-    std::string version_;
-    std::string method_;
+    constants::http_version version_;
+    constants::http_method method_;
     std::string url_;
 
     HttpQueryParameters query_params_;

@@ -6,6 +6,8 @@
 #include <string_view>
 #include <cerrno>
 
+#include "tinyhttp/constants.h"
+
 namespace tinyhttp::errors {
 
 class RuntimeError : public std::runtime_error {
@@ -35,26 +37,29 @@ class HttpInvalidQueryString : public HttpSyntaxError {
 class HttpInvalidRequestLine : public HttpSyntaxError {
 };
 
+class HttpVersionInvalid : public HttpSyntaxError {
+};
+
+class HttpMethodInvalid : public HttpSyntaxError {
+};
+
 class HttpStandardError : public HttpBaseError {
   public:
-    HttpStandardError(int code, std::string_view text);
+    explicit HttpStandardError(constants::http_response_status status_code);
 
-    [[nodiscard]] const std::string &get_text() const;
+    [[nodiscard]] std::string_view get_text() const;
 
-    [[nodiscard]] int get_code() const;
+    [[nodiscard]] constants::http_response_status get_code() const;
 
     ~HttpStandardError() override = default;
 
   private:
-    int code_{};
-    std::string text_;
+    constants::http_response_status code_{};
 };
 
 class HttpNotImplemented : public HttpStandardError {
   public:
     HttpNotImplemented();
-    explicit HttpNotImplemented(std::string_view text);
-
 };
 
 class IoError : public RuntimeError {

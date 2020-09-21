@@ -16,7 +16,13 @@ HttpRequestLine::HttpRequestLine(std::string_view request_line) {
         throw errors::HttpInvalidRequestLine();
     }
 
-    method_ = request_line.substr(0, space_pos);
+    auto http_method_str = request_line.substr(0, space_pos);
+
+    method_ = constants::get_http_method_code(http_method_str);
+    if (method_ == constants::http_method::UNSUPPORTED_) {
+        throw errors::HttpMethodInvalid();
+    }
+
     request_line.remove_prefix(space_pos + constants::strings::space.size());
 
     space_pos = request_line.find(constants::strings::space);
@@ -30,7 +36,7 @@ HttpRequestLine::HttpRequestLine(std::string_view request_line) {
 
     auto question_pos = url_.find(constants::strings::question);
     if (question_pos != std::string::npos
-        && question_pos  + constants::strings::question.size() < url_.size()) {
+        && question_pos + constants::strings::question.size() < url_.size()) {
         std::string_view query_string_view = url_;
         query_string_view = query_string_view.substr(
                 question_pos + constants::strings::question.size());
@@ -46,14 +52,20 @@ HttpRequestLine::HttpRequestLine(std::string_view request_line) {
         throw errors::HttpInvalidRequestLine();
     }
 
-    version_ = request_line.substr(slash_pos + constants::strings::slash.size());
+    auto http_version_str = request_line.substr(
+            slash_pos + constants::strings::slash.size());
+
+    version_ = constants::get_http_version_code(http_version_str);
+    if (version_ == constants::http_version::UNSUPPORTED_) {
+        throw errors::HttpVersionInvalid();
+    }
 }
 
-const std::string &HttpRequestLine::get_version() const {
+constants::http_version HttpRequestLine::get_version() const {
     return version_;
 }
 
-const std::string &HttpRequestLine::get_method() const {
+constants::http_method HttpRequestLine::get_method() const {
     return method_;
 }
 
@@ -68,7 +80,7 @@ const HttpQueryParameters &HttpRequestLine::get_query_string() const {
 std::string HttpRequestLine::to_string() const {
     std::string buf;
 
-    buf += method_;
+    buf += constants::get_http_method_text(method_);
 
     buf += constants::strings::space;
 
@@ -83,9 +95,7 @@ std::string HttpRequestLine::to_string() const {
 
     buf += constants::strings::http_upper;
     buf += constants::strings::slash;
-    buf += version_;
-
-    buf += constants::strings::newline;
+    buf += constants::get_http_version_text(version_);
 
     return buf;
 }

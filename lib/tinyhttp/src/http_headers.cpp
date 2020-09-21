@@ -112,12 +112,16 @@ HttpHeaders::headers_storage_t::const_iterator HttpHeaders::cend() const noexcep
 std::string HttpHeaders::to_string() const {
     std::string buf;
 
-    for (const auto &[header, value] : headers_) {
-        buf += header;
-        buf += constants::strings::colon;
-        buf += constants::strings::space;
-        buf += value;
-        buf += constants::strings::newline;
+    if (!headers_.empty()) {
+        for (const auto &[header, value] : headers_) {
+            buf += header;
+            buf += constants::strings::colon;
+            buf += constants::strings::space;
+            buf += value;
+            buf += constants::strings::newline;
+        }
+
+        buf.resize(buf.size() - constants::strings::newline.size());
     }
 
     return buf;
