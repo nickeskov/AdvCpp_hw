@@ -3,32 +3,8 @@
 #include "tinyhttp/errors.h"
 
 #include <algorithm>
-#include <cctype>
 
 namespace tinyhttp {
-
-namespace {
-
-void append_prettified_header(std::string &buf, std::string_view header) {
-    if (header.empty()) {
-        return;
-    }
-    buf += std::toupper(header.front());
-
-    if (header.size() == 1) {
-        return;
-    }
-
-    for (size_t i = 1; i < header.size(); ++i) {
-        if (header[i - 1] == constants::strings::dash.front()) {
-            buf += std::toupper(header[i]);
-        } else {
-            buf += header[i];
-        }
-    }
-}
-
-}
 
 HttpHeaders::HttpHeaders(std::string_view headers_values_view) {
     const auto headers_count = std::count(
@@ -138,9 +114,7 @@ std::string HttpHeaders::to_string() const {
 
     if (!headers_.empty()) {
         for (const auto &[header, value] : headers_) {
-            // TODO(nickeskov): headers must be case insensitive
-            // buf += header;
-            append_prettified_header(buf, header);
+            buf += header;
             buf += constants::strings::colon;
             buf += constants::strings::space;
             buf += value;
