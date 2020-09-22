@@ -24,7 +24,7 @@ int main() {
 //    trivilog::SafeStdoutLogger logger_;
 //
 //    tinyhttp::BasicStaticServer("127.0.0.1", 8000, logger_,
-//                                "/home/administrator/tmp"
+//                                "/home/administrator/tp/highload/http-test-suite"
 //    ).run(tinyhttp::Server::EventLoopConfig());
 
     return 0;

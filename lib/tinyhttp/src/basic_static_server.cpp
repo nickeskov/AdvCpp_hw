@@ -34,7 +34,7 @@ const std::unordered_map<std::string_view, std::string_view> mime_type_by_extens
         {".swf",  "application/x-shockwave-flash"},
 };
 
-constexpr size_t MAX_WRITE_BYTES_PER_CALL = 2048;
+constexpr size_t MAX_WRITE_BYTES_PER_CALL = 16384;
 constexpr std::string_view mime_octet_stream = "application/octet-stream";
 
 inline std::string_view get_mime_type(std::string_view extension) {
@@ -70,9 +70,7 @@ HttpResponse BasicStaticServer::on_request(const HttpRequest &request) {
         return HttpResponse(constants::http_response_status::MethodNotAllowed, http_version);
     }
 
-    std::string file_path_str = document_root_ + request.get_request_line().get_url();
-
-    fs::path file_path = file_path_str;
+    fs::path file_path = document_root_ + request.get_request_line().get_url();
 
     std::error_code error_code;
 
@@ -83,14 +81,20 @@ HttpResponse BasicStaticServer::on_request(const HttpRequest &request) {
         return HttpResponse(constants::http_response_status::NotFound, http_version);
     }
 
-    file_path_str = fs::canonical(file_path);
+    file_path = fs::canonical(file_path);
 
-    if (file_path_str.find(document_root_) != 0) { // nickeskov: check if file not in document root
+    if (file_path.native().find(document_root_) != 0) { // nickeskov: check if file not in document root
         return HttpResponse(constants::http_response_status::BadRequest, http_version);
     }
 
     if (fs::is_directory(file_path)) { // nickeskov: display index file
         file_path = file_path / "index.html";
+        if (!fs::exists(file_path, error_code)) { // nickeskov: check if index file exists
+            if (error_code) {
+                return HttpResponse(constants::http_response_status::InternalServerError, http_version);
+            }
+            return HttpResponse(constants::http_response_status::Forbidden, http_version);
+        }
     }
 
     if (!fs::exists(file_path, error_code)) { // nickeskov: check if index file exists
@@ -114,8 +118,8 @@ HttpResponse BasicStaticServer::on_request(const HttpRequest &request) {
         return response; // nickeskov: if head request response must have empty body
     }
 
-    auto sender = [file_path_str, content_length](Connection &connection, HttpResponse &http_response) {
-        auto fd_file = unixprimwrap::Descriptor(open(file_path_str.c_str(), O_RDONLY));
+    auto sender = [file_path, content_length](Connection &connection, HttpResponse &http_response) {
+        auto fd_file = unixprimwrap::Descriptor(open(file_path.c_str(), O_RDONLY));
         if (!fd_file.is_valid()) {
             http_response.reset_headers();
             http_response.get_response_line().set_response_status(
@@ -144,7 +148,7 @@ HttpResponse BasicStaticServer::on_request(const HttpRequest &request) {
             for (size_t written = 0; written < write_size;) {
                 // nickeskov: send maximum of possible bytes per call
                 auto bytes = sendfile(connection.get_io_service().data(), fd_file.data(),
-                                      nullptr, write_size - written);
+                                      nullptr, MAX_WRITE_BYTES_PER_CALL);
 
                 if (bytes < 0) {
                     if (errno != EAGAIN) {

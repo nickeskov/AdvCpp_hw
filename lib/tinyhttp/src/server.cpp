@@ -4,7 +4,6 @@
 
 #include <cerrno>
 #include <cstring>
-#include <version>
 #include <thread>
 
 extern "C" {

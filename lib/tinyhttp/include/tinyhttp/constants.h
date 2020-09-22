@@ -20,6 +20,7 @@ constexpr std::string_view equal = "=";
 constexpr std::string_view percent = "%";
 constexpr std::string_view plus = "+";
 constexpr std::string_view slash = "/";
+constexpr std::string_view dash = "-";
 constexpr std::string_view http_upper = "HTTP";
 constexpr std::string_view http_lower = "http";
 

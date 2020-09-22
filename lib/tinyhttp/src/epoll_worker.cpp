@@ -229,9 +229,12 @@ void EpollWorker::handle_client(epoll_event fd_event) {
     coroutine::coroutine_status status = coroutine::coroutine_status::NONE;
     try {
         status = coroutine::resume(client_conn_io_service);
-    } catch (const errors::IoError &e) {
+    } catch (const errors::EofError &e) {
+        logger_.info("[worker " + std::to_string(worker_id_) + "] " + e.what());
+    }
+    catch (const errors::IoError &e) {
         logger_.info("[worker " + std::to_string(worker_id_) + "] " + e.what()
-                     + " : " + std::strerror(e.errno_code()));
+                     + ": " + std::strerror(e.errno_code()));
         // TODO(nickeckov): ignored, need handle all exception types
     }
 
@@ -299,8 +302,10 @@ std::string_view read_body(Connection &connection, size_t start_pos, ssize_t bod
         ssize_t was_read = buff_size - start_pos;
         while (was_read < body_len) {
             ssize_t bytes = connection.read_in_io_buff(MAX_READ_BYTES_PER_CALL);
-
-            if (bytes < 0) {
+            if (bytes <= 0) {
+                if (bytes == 0) {
+                    throw errors::EofError("Connection closed while receiving BODY");
+                }
                 coroutine::yield();
                 continue;
             }
@@ -330,7 +335,7 @@ size_t read_until_headers_end(Connection &connection) {
         ssize_t bytes = connection.read_in_io_buff(MAX_READ_BYTES_PER_CALL);
         if (bytes <= 0) {
             if (bytes == 0) {
-                throw errors::EofError("connection closed");
+                throw errors::EofError("Connection closed while receiving HEADERS");
             }
             coroutine::yield(); // TODO(nickeskov): 0 means connection closed!
             continue;
