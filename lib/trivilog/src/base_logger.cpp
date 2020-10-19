@@ -3,15 +3,35 @@
 #include <chrono>
 #include <iomanip>
 #include <ctime>
+#include <sstream>
 
 namespace trivilog {
 
 namespace {
 
-decltype(auto) now_time() {
+constexpr char const *en_us_locale_name = "en_US.UTF8";
+
+// TODO(nickeskov): use strftime function for reduce temporary strings creation and memory allocations
+// TODO(nickeskov): remove stringstream and use something else, because stringstream is heavy
+std::string now_time_to_str_gmt(const char *fmt, const char *locale) {
     auto now = std::chrono::system_clock::now();
     auto time = std::chrono::system_clock::to_time_t(now);
-    return std::put_time(std::gmtime(&time), "%Y-%m-%d %T");
+
+    std::stringstream ss;
+    ss.imbue(std::locale(locale));
+
+    tm out_date_time{};
+
+    // NOTE(nickeskov): std::gmtime NOT THEAD SAFE, using POSIX gmtime_r to prevent data race
+    gmtime_r(&time, &out_date_time);
+
+    ss << std::put_time(&out_date_time, fmt);
+
+    return ss.str();
+}
+
+std::string now_time() {
+    return now_time_to_str_gmt("%Y-%m-%d %T", en_us_locale_name);
 }
 
 constexpr inline std::string_view trace_level_name = "[TRACE]";

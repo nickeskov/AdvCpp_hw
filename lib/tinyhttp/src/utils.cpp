@@ -16,7 +16,7 @@ extern "C" {
 
 namespace {
 
-const char *const en_us_locale_name = "en_US.UTF8";
+constexpr char const *en_us_locale_name = "en_US.UTF8";
 
 }
 
@@ -95,22 +95,28 @@ int set_nonblock(int fd, bool opt) {
 #endif
 }
 
-std::string now_time_to_str_gmt(const char *fmt) {
+// TODO(nickeskov): use strftime function for reduce temporary strings creation and memory allocations
+// TODO(nickeskov): remove stringstream and use something else, because stringstream is heavy
+std::string now_time_to_str_gmt(const char *fmt, const char *locale) {
     auto now = std::chrono::system_clock::now();
     auto time = std::chrono::system_clock::to_time_t(now);
 
     std::stringstream ss;
-    ss.imbue(std::locale(en_us_locale_name));
+    ss.imbue(std::locale(locale));
 
-    ss << std::put_time(std::gmtime(&time), fmt);
+    tm out_date_time{};
+
+    // NOTE(nickeskov): std::gmtime NOT THEAD SAFE, using POSIX gmtime_r to prevent data race
+    gmtime_r(&time, &out_date_time);
+
+    ss << std::put_time(&out_date_time, fmt);
 
     return ss.str();
-
 }
 
 std::string get_date_http_str() {
     // RFC 7231, 7.1.1.2: Date
-    return now_time_to_str_gmt("%a, %d %b %Y %T %Z");
+    return now_time_to_str_gmt("%a, %d %b %Y %T %Z", en_us_locale_name);
 }
 
 }
