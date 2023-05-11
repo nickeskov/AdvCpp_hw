@@ -70,6 +70,8 @@ option(HW_ENABLE_HW1 "Enable hw1 tests and build all additional hw1 libraries fo
 option(HW_ENABLE_HW2 "Enable hw2 tests and build all additional hw2 libraries for ${PROJECT_NAME}" OFF)
 option(HW_ENABLE_HW3 "Enable hw3 tests and build all additional hw3 libraries for ${PROJECT_NAME}" OFF)
 option(HW_ENABLE_HW4 "Enable hw4 tests and build all additional hw4 libraries for ${PROJECT_NAME}" OFF)
+option(HW_ENABLE_HW5 "Enable hw5 tests and build all additional hw5 libraries for ${PROJECT_NAME}" OFF)
+option(HW_ENABLE_HW6 "Enable hw5 tests and build all additional hw6 libraries for ${PROJECT_NAME}" OFF)
 option(HW_ENABLE_ALL "Enable all hw tests and build all libraries for ${PROJECT_NAME}" OFF)
 
 add_executable(hw
@@ -114,4 +116,11 @@ if (HW_ENABLE_ALL OR HW_ENABLE_HW5)
     add_subdirectory(lib/shmem)
     target_link_libraries(hw shmem)
     target_compile_definitions(hw PRIVATE HW_ENABLE_HW5)
+endif ()
+
+if (HW_ENABLE_ALL OR HW_ENABLE_HW6)
+    add_subdirectory(lib/coroutine)
+    add_subdirectory(lib/tinyhttp)
+    target_link_libraries(hw tinyhttp)
+    target_compile_definitions(hw PRIVATE HW_ENABLE_HW6)
 endif ()

@@ -97,11 +97,9 @@ Server::Server(std::string_view ip, uint16_t port)
     src_port_ = port;
 }
 
-Server::Server(Server &&other) noexcept {
-    server_sock_fd_ = std::move(other.server_sock_fd_);
-    src_addr_ = std::move(other.src_addr_);
-    src_port_ = other.src_port_;
-    clients_ = std::move(other.clients_);
+Server::Server(Server &&other) noexcept
+        : server_sock_fd_(std::move(other.server_sock_fd_)), src_addr_(std::move(other.src_addr_)),
+          src_port_(other.src_port_), clients_(std::move(other.clients_)) {
     is_stoped_.exchange(other.is_stoped_);
 }
 
@@ -176,15 +174,13 @@ bool Server::add_to_event_loop(Connection &&connection, uint32_t events) {
     return true;
 }
 
-bool Server::remove_from_event_loop(Connection &connection) {
-    int conn_io_service = connection.get_io_service().data();
-
+bool Server::remove_from_event_loop(int connection_io_service) {
     if (epoll_fd_.is_valid()
-        && epoll_del(epoll_fd_.data(), conn_io_service) < 0) {
+        && epoll_del(epoll_fd_.data(), connection_io_service) < 0) {
         return false;
     }
     // Not throws any exceptions, because key type == int
-    clients_.erase(conn_io_service);
+    clients_.erase(connection_io_service);
     return false;
 }
 
